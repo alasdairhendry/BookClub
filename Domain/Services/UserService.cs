@@ -3,7 +3,6 @@ using Data.Models.Dbo;
 using Domain.Interfaces;
 using Domain.Models.DTO;
 using Domain.Models.State;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
 
@@ -28,7 +27,7 @@ public class UserService : IUserService
             if(model.Password != model.ConfirmPassword)
                 return ResultState.Failed("Passwords do not match");
             
-            var user = new IdentityUser { UserName = model.Email, Email = model.Email };
+            var user = new ApplicationUserDbo { UserName = model.Email, Email = model.Email };
             var result = await _signInManager.UserManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
@@ -71,6 +70,9 @@ public class UserService : IUserService
             
             if(result.IsNotAllowed)
                 return ResultState.Failed("Email has not been confirmed yet");
+            
+            if(result.Succeeded == false)
+                return ResultState.Failed("User not found");
             
             throw new Exception(JsonConvert.SerializeObject(result));
         }
