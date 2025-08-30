@@ -1,0 +1,11 @@
+using Domain.Models.DTO;
+using Domain.Models.State;
+
+namespace Domain.Interfaces;
+
+public interface IUserService
+{
+    Task<ResultState> Register(UserRegistrationModel model);
+    Task<ResultState> Login(UserLoginModel model);
+    Task<ResultState<UserTokenModel>> GetToken(UserLoginModel model);
+}
