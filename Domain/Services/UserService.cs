@@ -11,10 +11,12 @@ namespace Domain.Services;
 public class UserService : IUserService
 {
     private readonly SignInManager<IdentityUser> _signInManager;
+    private readonly IHttpContextAccessor _contextAccessor;
 
-    public UserService(SignInManager<IdentityUser> signInManager)
+    public UserService(SignInManager<IdentityUser> signInManager, IHttpContextAccessor contextAccessor)
     {
         _signInManager = signInManager;
+        _contextAccessor = contextAccessor;
     }
 
     public async Task<ResultState> Register(UserRegistrationModel model)
@@ -59,6 +61,7 @@ public class UserService : IUserService
     {
         try
         {
+            _signInManager.AuthenticationScheme = IdentityConstants.ApplicationScheme;
             var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, true, false);
             
             if(result.Succeeded)
@@ -83,8 +86,19 @@ public class UserService : IUserService
     {
         try
         {
-            await Task.Delay(1);
-            return ResultState<UserTokenModel>.Success(null!);
+            _signInManager.AuthenticationScheme = IdentityConstants.BearerScheme;
+            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, true, false);
+            
+            if(result.Succeeded)
+                return ResultState<UserTokenModel>.Success(null!);
+            
+            if(result.IsLockedOut)
+                return ResultState<UserTokenModel>.Failed(null!, "Account is temporarily locked");
+            
+            if(result.IsNotAllowed)
+                return ResultState<UserTokenModel>.Failed(null!, "Email has not been confirmed yet");
+            
+            throw new Exception(JsonConvert.SerializeObject(result));
         }
         catch (Exception e)
         {
