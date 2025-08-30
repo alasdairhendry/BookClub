@@ -24,7 +24,7 @@ public class UnitOfWork : IDisposable
             return activityRepository;
         }
     }
-    
+
     public GenericRepository<ActivitySectionDbo> ActivitySectionRepository
     {
         get
@@ -35,7 +35,7 @@ public class UnitOfWork : IDisposable
             return activitySectionRepository;
         }
     }
-    
+
     public GenericRepository<ApplicationUserDbo> ApplicationUserRepository
     {
         get
@@ -46,7 +46,7 @@ public class UnitOfWork : IDisposable
             return applicationUserRepository;
         }
     }
-    
+
     public GenericRepository<ClubDbo> ClubRepository
     {
         get
@@ -57,7 +57,7 @@ public class UnitOfWork : IDisposable
             return clubRepository;
         }
     }
-    
+
     public GenericRepository<CommentDbo> CommentRepository
     {
         get
@@ -68,7 +68,7 @@ public class UnitOfWork : IDisposable
             return commentRepository;
         }
     }
-    
+
     public GenericRepository<RecordDbo> RecordRepository
     {
         get
@@ -83,6 +83,11 @@ public class UnitOfWork : IDisposable
     public void Save()
     {
         context.SaveChanges();
+    }
+
+    public async Task SaveAsync()
+    {
+        await context.SaveChangesAsync();
     }
 
     private bool disposed = false;

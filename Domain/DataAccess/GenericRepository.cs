@@ -6,8 +6,8 @@ namespace Domain.DataAccess;
 
 public class GenericRepository<TEntity> where TEntity : class
 {
-    internal ApplicationDbContext context;
-    internal DbSet<TEntity> dbSet;
+    private ApplicationDbContext context;
+    private DbSet<TEntity> dbSet;
 
     public GenericRepository(ApplicationDbContext context)
     {
@@ -15,7 +15,7 @@ public class GenericRepository<TEntity> where TEntity : class
         this.dbSet = context.Set<TEntity>();
     }
 
-    public virtual IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>>? filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null, string includeProperties = "")
+    public virtual async Task<IEnumerable<TEntity>> GetAsync(Expression<Func<TEntity, bool>>? filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null, string includeProperties = "")
     {
         IQueryable<TEntity> query = dbSet;
 
@@ -31,11 +31,11 @@ public class GenericRepository<TEntity> where TEntity : class
 
         if (orderBy != null)
         {
-            return orderBy(query).ToList();
+            return await orderBy(query).ToListAsync();
         }
         else
         {
-            return query.ToList();
+            return await query.ToListAsync(();
         }
     }
 
@@ -43,10 +43,20 @@ public class GenericRepository<TEntity> where TEntity : class
     {
         return dbSet.Find(id);
     }
+    
+    public virtual async Task<TEntity?> GetByIDAsync(object id)
+    {
+        return await dbSet.FindAsync(id);
+    }
 
     public virtual void Insert(TEntity entity)
     {
         dbSet.Add(entity);
+    }
+    
+    public virtual async Task InsertAsync(TEntity entity)
+    {
+        await dbSet.AddAsync(entity);
     }
 
     public virtual void Delete(object id)
