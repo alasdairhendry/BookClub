@@ -2,7 +2,6 @@ using System.Text.RegularExpressions;
 using Domain.Interfaces;
 using Domain.Models.DTO;
 using Domain.Models.State;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
 
@@ -11,12 +10,10 @@ namespace Domain.Services;
 public class UserService : IUserService
 {
     private readonly SignInManager<IdentityUser> _signInManager;
-    private readonly IHttpContextAccessor _contextAccessor;
 
-    public UserService(SignInManager<IdentityUser> signInManager, IHttpContextAccessor contextAccessor)
+    public UserService(SignInManager<IdentityUser> signInManager)
     {
         _signInManager = signInManager;
-        _contextAccessor = contextAccessor;
     }
 
     public async Task<ResultState> Register(UserRegistrationModel model)
