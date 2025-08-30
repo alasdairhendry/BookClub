@@ -12,7 +12,7 @@ public class ResultState : ResultState<bool>
         return new ResultState { Succeeded = false, Data = false };
     }
     
-    public static ResultState Failed(string publicMessage)
+    public static ResultState Failed(string? publicMessage)
     {
         return new ResultState { Succeeded = false, Data = false, PublicMessage = publicMessage };
     }

@@ -11,7 +11,7 @@ public class ResultState<T>
         return new ResultState<T> { Succeeded = true, Data = data };
     }
 
-    public static ResultState<T> Failed(T data, string publicMessage)
+    public static ResultState<T> Failed(T data, string? publicMessage)
     {
         return new ResultState<T> { Succeeded = false, Data = data, PublicMessage = publicMessage };
     }
