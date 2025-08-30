@@ -11,5 +11,5 @@ public class ClubDbo
     [MaxLength(256)] public string? Motto { get; set; }
     [MaxLength(256)] public string? ImageUrl { get; set; }
     
-    public List<IdentityUser> Members { get; set; }
+    public List<ApplicationUserDbo> Members { get; set; }
 }

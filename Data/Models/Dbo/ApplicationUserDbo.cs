@@ -5,4 +5,5 @@ namespace Data.Models.Dbo;
 public class ApplicationUserDbo : IdentityUser
 {
     public List<ClubDbo> Clubs { get; set; }
+    public ICollection<CommentDbo> Comments { get; set; }
 }
