@@ -7,7 +7,7 @@ public class ApiResponseFactory
 {
     public ObjectResult InternalServerError()
     {
-        return new ObjectResult(new ApiErrorResponse("An unexpected error has occurred"))
+        return new ObjectResult(new ApiErrorResponse("An error has occurred"))
         {
             StatusCode = StatusCodes.Status500InternalServerError
         };
