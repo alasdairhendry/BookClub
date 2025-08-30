@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using Domain.Interfaces;
 using Domain.Models.DTO;
 using Domain.Models.State;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
 
@@ -10,10 +11,50 @@ namespace Domain.Services;
 public class UserService : IUserService
 {
     private readonly SignInManager<IdentityUser> _signInManager;
+    private readonly IHttpContextAccessor _contextAccessor;
 
-    public UserService(SignInManager<IdentityUser> signInManager)
+    public UserService(SignInManager<IdentityUser> signInManager, IHttpContextAccessor contextAccessor)
     {
         _signInManager = signInManager;
+        _contextAccessor = contextAccessor;
+    }
+
+    /// <summary>
+    /// Is the context user active, authenticated, not blocked etc.
+    /// Essentially, free to make actions on the app (create clubs, comments, etc.)
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public async Task<ResultState> ContextUserIsActiveAsync(Guid userId)
+    {
+        try
+        {
+            var claimsPrincipal = _contextAccessor.HttpContext?.User;
+
+            if (claimsPrincipal?.Identity is null)
+                return ResultState.Failed("User not authenticated");
+
+            if (claimsPrincipal.Identity?.IsAuthenticated == false)
+                return ResultState.Failed("User not authenticated");
+
+            var identityUser = await _signInManager.UserManager.GetUserAsync(claimsPrincipal);
+
+            if (identityUser == null)
+                return ResultState.Failed("User not authenticated");
+
+            if (identityUser.EmailConfirmed == false)
+                return ResultState.Failed("Email has not been confirmed yet");
+            
+            if (identityUser.LockoutEnd >= DateTime.UtcNow)
+                return ResultState.Failed("Account is temporarily locked");
+            
+            return ResultState.Success();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return ResultState.Failed("An error has occurred");
+        }
     }
 
     public async Task<ResultState> Register(UserRegistrationModel model)
