@@ -1,7 +1,11 @@
+using System.ComponentModel;
+
 namespace Domain.Models.DTO;
 
 public class UserLoginModel
 {
+    [DefaultValue("test@gmail.com")]
     public required string Email { get; set; }
+    [DefaultValue("Passw0rd!")]
     public required string Password { get; set; }
 }
