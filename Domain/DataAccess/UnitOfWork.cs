@@ -6,7 +6,7 @@ namespace Domain.DataAccess;
 
 public class UnitOfWork : IDisposable
 {
-    private ApplicationDbContext context = new ApplicationDbContext(new DbContextOptions<ApplicationDbContext>());
+    private ApplicationDbContext context;
     private GenericRepository<ActivityDbo> activityRepository = null!;
     private GenericRepository<ActivitySectionDbo> activitySectionRepository = null!;
     private GenericRepository<ApplicationUserDbo> applicationUserRepository = null!;
@@ -14,6 +14,11 @@ public class UnitOfWork : IDisposable
     private GenericRepository<CommentDbo> commentRepository = null!;
     private GenericRepository<RecordDbo> recordRepository = null!;
 
+    public UnitOfWork(ApplicationDbContext context)
+    {
+        this.context = context;
+    }
+    
     public GenericRepository<ActivityDbo> ActivityRepository
     {
         get

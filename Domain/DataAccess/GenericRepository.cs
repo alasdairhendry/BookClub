@@ -35,17 +35,23 @@ public class GenericRepository<TEntity> where TEntity : class
         }
         else
         {
-            return await query.ToListAsync(();
+            return await query.ToListAsync();
         }
     }
 
-    public virtual TEntity? GetByID(object id)
+    public virtual TEntity? GetByID(object? id)
     {
+        if (id is null)
+            return null;
+        
         return dbSet.Find(id);
     }
     
-    public virtual async Task<TEntity?> GetByIDAsync(object id)
+    public virtual async Task<TEntity?> GetByIDAsync(object? id)
     {
+        if (id is null)
+            return null;
+        
         return await dbSet.FindAsync(id);
     }
 
@@ -59,9 +65,9 @@ public class GenericRepository<TEntity> where TEntity : class
         await dbSet.AddAsync(entity);
     }
 
-    public virtual void Delete(object id)
+    public virtual async Task DeleteAsync(object id)
     {
-        TEntity? entityToDelete = dbSet.Find(id);
+        TEntity? entityToDelete = await dbSet.FindAsync(id);
 
         if (entityToDelete != null)
             Delete(entityToDelete);
