@@ -7,16 +7,30 @@ namespace Domain.DataAccess;
 public class UnitOfWork : IDisposable
 {
     private ApplicationDbContext context;
+    
+    private GenericRepository<ApplicationUserDbo> applicationUserRepository = null!;
     private GenericRepository<ClubActivityDbo> activityRepository = null!;
     private GenericRepository<ClubActivitySectionDbo> activitySectionRepository = null!;
-    private GenericRepository<ApplicationUserDbo> applicationUserRepository = null!;
     private GenericRepository<ClubDbo> clubRepository = null!;
+    private GenericRepository<ClubMembershipDbo> clubMembershipRepository = null!;
     private GenericRepository<CommentDbo> commentRepository = null!;
+    private GenericRepository<InvitationDbo> invitationRepository = null!;
     private GenericRepository<RecordDbo> recordRepository = null!;
 
     public UnitOfWork(ApplicationDbContext context)
     {
         this.context = context;
+    }
+    
+    public GenericRepository<ApplicationUserDbo> ApplicationUserRepository
+    {
+        get
+        {
+            if (this.applicationUserRepository == null)
+                this.applicationUserRepository = new GenericRepository<ApplicationUserDbo>(context);
+
+            return applicationUserRepository;
+        }
     }
     
     public GenericRepository<ClubActivityDbo> ActivityRepository
@@ -29,7 +43,7 @@ public class UnitOfWork : IDisposable
             return activityRepository;
         }
     }
-
+    
     public GenericRepository<ClubActivitySectionDbo> ActivitySectionRepository
     {
         get
@@ -38,17 +52,6 @@ public class UnitOfWork : IDisposable
                 this.activitySectionRepository = new GenericRepository<ClubActivitySectionDbo>(context);
 
             return activitySectionRepository;
-        }
-    }
-
-    public GenericRepository<ApplicationUserDbo> ApplicationUserRepository
-    {
-        get
-        {
-            if (this.applicationUserRepository == null)
-                this.applicationUserRepository = new GenericRepository<ApplicationUserDbo>(context);
-
-            return applicationUserRepository;
         }
     }
 
@@ -63,6 +66,17 @@ public class UnitOfWork : IDisposable
         }
     }
 
+    public GenericRepository<ClubMembershipDbo> ClubMembershipRepository
+    {
+        get
+        {
+            if (this.clubMembershipRepository == null)
+                this.clubMembershipRepository = new GenericRepository<ClubMembershipDbo>(context);
+
+            return clubMembershipRepository;
+        }
+    }
+    
     public GenericRepository<CommentDbo> CommentRepository
     {
         get
@@ -74,6 +88,17 @@ public class UnitOfWork : IDisposable
         }
     }
 
+    public GenericRepository<InvitationDbo> InvitationRepository
+    {
+        get
+        {
+            if (this.invitationRepository == null)
+                this.invitationRepository = new GenericRepository<InvitationDbo>(context);
+
+            return invitationRepository;
+        }
+    }
+    
     public GenericRepository<RecordDbo> RecordRepository
     {
         get

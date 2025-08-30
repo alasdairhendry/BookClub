@@ -9,5 +9,5 @@ public class ClubDto
     public string? ImageUrl { get; set; }
     public bool IsPrivate { get; set; } = true;
 
-    public List<Guid> MembersIds { get; set; } = [];
+    public List<Guid> MembershipIds { get; set; } = [];
 }

@@ -15,6 +15,6 @@ public class ClubDbo
     public DateTime DateCreated { get; set; }
     public Guid? CreatedById { get; set; }
 
-    public List<ClubMembershipDbo> Memberships { get; set; } = [];
+    public ICollection<ClubMembershipDbo> ClubMemberships { get; set; } = [];
     public ICollection<InvitationDbo> Invitations { get; set; } = [];
 }

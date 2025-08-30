@@ -45,7 +45,7 @@ public class ClubService : IClubService
                 Motto = result.Motto,
                 IsPrivate = result.IsPrivate,
                 ImageUrl = result.ImageUrl,
-                MembersIds = result.Members.Select(x => x.Id).ToList(),
+                MembershipIds = result.ClubMemberships.Select(x => x.Id).ToList(),
             };
 
             return ResultState<ClubDto?>.Success(club);
@@ -67,7 +67,7 @@ public class ClubService : IClubService
                 return ResultState<List<ClubDto>>.Failed([], user.PublicMessage);
 
             using var work = new UnitOfWork(_dbContext);
-            var result = await work.ClubRepository.GetAsync();
+            var result = await work.ClubRepository.GetAsync(includeProperties: "ClubMemberships");
 
             List<ClubDto> clubs = result.Take(20).Select(x => new ClubDto()
             {
@@ -76,7 +76,7 @@ public class ClubService : IClubService
                 Motto = x.Motto,
                 IsPrivate = x.IsPrivate,
                 ImageUrl = x.ImageUrl,
-                MembersIds = x.Members.Select(x => x.Id).ToList(),
+                MembershipIds = x.ClubMemberships.Select(y => y.Id).ToList(),
             }).ToList();
 
             return ResultState<List<ClubDto>>.Success(clubs);
@@ -105,10 +105,21 @@ public class ClubService : IClubService
                 Motto = model.Motto,
                 ImageUrl = model.ImageUrl,
                 IsPrivate = model.IsPrivate,
-                Members = [user.Data]
+                DateCreated = DateTime.UtcNow,
+                CreatedById = user.Data.Id,
+                ClubMemberships = []
             };
 
             await work.ClubRepository.InsertAsync(club);
+
+            ClubMembershipDbo membership = new ClubMembershipDbo
+            {
+                ClubId = club.Id,
+                UserId = user.Data.Id,
+                IsAdmin = true
+            };
+
+            await work.ClubMembershipRepository.InsertAsync(membership);
             await work.SaveAsync();
 
             return ResultState<Guid?>.Success(club.Id);
