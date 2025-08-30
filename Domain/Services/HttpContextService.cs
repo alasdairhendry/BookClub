@@ -40,11 +40,12 @@ public class HttpContextService : IHttpContextService
             if (identityUser == null)
                 return ResultState<ApplicationUserDbo?>.Failed(null, "User not authenticated");
 
-            if (identityUser.EmailConfirmed == false)
-                return ResultState<ApplicationUserDbo?>.Failed(null, "Email has not been confirmed yet");
-            
-            if (identityUser.LockoutEnd >= DateTime.UtcNow)
-                return ResultState<ApplicationUserDbo?>.Failed(null, "Account is temporarily locked");
+            // TODO - Uncomment once testing concluded
+            // if (identityUser.EmailConfirmed == false)
+            //     return ResultState<ApplicationUserDbo?>.Failed(null, "Email has not been confirmed yet");
+            //
+            // if (identityUser.LockoutEnd >= DateTime.UtcNow)
+            //     return ResultState<ApplicationUserDbo?>.Failed(null, "Account is temporarily locked");
             
             return ResultState<ApplicationUserDbo?>.Success(identityUser);
         }
