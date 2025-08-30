@@ -1,3 +1,4 @@
+using Data.Models.Dbo;
 using Domain.Models.DTO;
 using Domain.Models.State;
 
@@ -15,5 +16,5 @@ public interface IUserService
     /// </summary>
     /// <param name="userId"></param>
     /// <returns></returns>
-    Task<ResultState> ContextUserIsActiveAsync(Guid userId);
+    Task<ResultState<ApplicationUserDbo?>> ContextUserIsActiveAsync();
 }

@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Data.Models.Dbo;
 using Domain.Interfaces;
 using Domain.Models.DTO;
 using Domain.Models.State;
@@ -10,10 +11,10 @@ namespace Domain.Services;
 
 public class UserService : IUserService
 {
-    private readonly SignInManager<IdentityUser> _signInManager;
+    private readonly SignInManager<ApplicationUserDbo> _signInManager;
     private readonly IHttpContextAccessor _contextAccessor;
 
-    public UserService(SignInManager<IdentityUser> signInManager, IHttpContextAccessor contextAccessor)
+    public UserService(SignInManager<ApplicationUserDbo> signInManager, IHttpContextAccessor contextAccessor)
     {
         _signInManager = signInManager;
         _contextAccessor = contextAccessor;
@@ -25,35 +26,35 @@ public class UserService : IUserService
     /// </summary>
     /// <param name="userId"></param>
     /// <returns></returns>
-    public async Task<ResultState> ContextUserIsActiveAsync(Guid userId)
+    public async Task<ResultState<ApplicationUserDbo?>> ContextUserIsActiveAsync()
     {
         try
         {
             var claimsPrincipal = _contextAccessor.HttpContext?.User;
 
             if (claimsPrincipal?.Identity is null)
-                return ResultState.Failed("User not authenticated");
+                return ResultState<ApplicationUserDbo?>.Failed(null, "User not authenticated");
 
             if (claimsPrincipal.Identity?.IsAuthenticated == false)
-                return ResultState.Failed("User not authenticated");
+                return ResultState<ApplicationUserDbo?>.Failed(null, "User not authenticated");
 
             var identityUser = await _signInManager.UserManager.GetUserAsync(claimsPrincipal);
 
             if (identityUser == null)
-                return ResultState.Failed("User not authenticated");
+                return ResultState<ApplicationUserDbo?>.Failed(null, "User not authenticated");
 
             if (identityUser.EmailConfirmed == false)
-                return ResultState.Failed("Email has not been confirmed yet");
+                return ResultState<ApplicationUserDbo?>.Failed(null, "Email has not been confirmed yet");
             
             if (identityUser.LockoutEnd >= DateTime.UtcNow)
-                return ResultState.Failed("Account is temporarily locked");
+                return ResultState<ApplicationUserDbo?>.Failed(null, "Account is temporarily locked");
             
-            return ResultState.Success();
+            return ResultState<ApplicationUserDbo?>.Success(identityUser);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return ResultState.Failed("An error has occurred");
+            return ResultState<ApplicationUserDbo?>.Failed(null, "An error has occurred");
         }
     }
 
