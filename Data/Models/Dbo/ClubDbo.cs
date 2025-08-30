@@ -10,6 +10,7 @@ public class ClubDbo
     [MaxLength(128)] public string Name { get; set; } = null!;
     [MaxLength(256)] public string? Motto { get; set; }
     [MaxLength(256)] public string? ImageUrl { get; set; }
-    
-    public List<ApplicationUserDbo> Members { get; set; }
+    [MaxLength(256)] public bool IsPrivate { get; set; } = true;
+
+    public List<ApplicationUserDbo> Members { get; set; } = [];
 }
