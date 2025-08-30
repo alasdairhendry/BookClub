@@ -19,7 +19,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<IdentityUser>().AddEntityFrameworkStores<ApplicationDbContext>();
 
 // Adds endpoints for minimal api controllers used in app.MapIdentityApi<IdentityUser>();
-builder.Services.AddEndpointsApiExplorer();
+// builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -54,7 +54,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // Adds authentication endpoints 
-app.MapGroup("/api/v1/").MapIdentityApi<IdentityUser>();
+// app.MapGroup("/api/v1/").MapIdentityApi<IdentityUser>();
 app.MapSwagger().RequireAuthorization();
 
 app.UseHttpsRedirection();
