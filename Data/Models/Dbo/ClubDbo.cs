@@ -10,7 +10,11 @@ public class ClubDbo
     [MaxLength(128)] public string Name { get; set; } = null!;
     [MaxLength(256)] public string? Motto { get; set; }
     [MaxLength(256)] public string? ImageUrl { get; set; }
-    [MaxLength(256)] public bool IsPrivate { get; set; } = true;
+    public bool IsPrivate { get; set; } = true;
+    
+    public DateTime DateCreated { get; set; }
+    public Guid? CreatedById { get; set; }
 
-    public List<ApplicationUserDbo> Members { get; set; } = [];
+    public List<ClubMembershipDbo> Memberships { get; set; } = [];
+    public ICollection<InvitationDbo> Invitations { get; set; } = [];
 }

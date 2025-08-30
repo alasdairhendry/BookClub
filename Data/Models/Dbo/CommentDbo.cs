@@ -9,7 +9,7 @@ public class CommentDbo
     public ApplicationUserDbo? User { get; set; }
     
     public Guid ActivitySectionId { get; set; }
-    public ActivitySectionDbo? ActivitySection { get; set; } = null!;
-    
-    public ICollection<Guid> Children { get; set; } = null!;
+    public ClubActivitySectionDbo? ActivitySection { get; set; } = null!;
+
+    public ICollection<Guid> Children { get; set; } = [];
 }

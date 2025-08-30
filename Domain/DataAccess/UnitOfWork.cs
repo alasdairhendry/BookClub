@@ -7,8 +7,8 @@ namespace Domain.DataAccess;
 public class UnitOfWork : IDisposable
 {
     private ApplicationDbContext context;
-    private GenericRepository<ActivityDbo> activityRepository = null!;
-    private GenericRepository<ActivitySectionDbo> activitySectionRepository = null!;
+    private GenericRepository<ClubActivityDbo> activityRepository = null!;
+    private GenericRepository<ClubActivitySectionDbo> activitySectionRepository = null!;
     private GenericRepository<ApplicationUserDbo> applicationUserRepository = null!;
     private GenericRepository<ClubDbo> clubRepository = null!;
     private GenericRepository<CommentDbo> commentRepository = null!;
@@ -19,23 +19,23 @@ public class UnitOfWork : IDisposable
         this.context = context;
     }
     
-    public GenericRepository<ActivityDbo> ActivityRepository
+    public GenericRepository<ClubActivityDbo> ActivityRepository
     {
         get
         {
             if (this.activityRepository == null)
-                this.activityRepository = new GenericRepository<ActivityDbo>(context);
+                this.activityRepository = new GenericRepository<ClubActivityDbo>(context);
 
             return activityRepository;
         }
     }
 
-    public GenericRepository<ActivitySectionDbo> ActivitySectionRepository
+    public GenericRepository<ClubActivitySectionDbo> ActivitySectionRepository
     {
         get
         {
             if (this.activitySectionRepository == null)
-                this.activitySectionRepository = new GenericRepository<ActivitySectionDbo>(context);
+                this.activitySectionRepository = new GenericRepository<ClubActivitySectionDbo>(context);
 
             return activitySectionRepository;
         }

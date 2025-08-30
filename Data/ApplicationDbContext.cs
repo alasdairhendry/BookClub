@@ -11,8 +11,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUserDbo, Identi
         base(options)
     { }
     
-    public DbSet<ActivityDbo> Activities { get; set; }
-    public DbSet<ActivitySectionDbo> ActivitySections { get; set; }
+    public DbSet<ClubActivityDbo> Activities { get; set; }
+    public DbSet<ClubActivitySectionDbo> ActivitySections { get; set; }
     public new DbSet<ApplicationUserDbo> Users { get; set; }
     public DbSet<ClubDbo> Clubs { get; set; }
     public DbSet<CommentDbo> Comments { get; set; }

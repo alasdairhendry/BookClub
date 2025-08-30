@@ -11,7 +11,7 @@ public class RecordDbo
     [MaxLength(2048)] public string CoverUrl { get; set; } = null!;
     
     public string? ISBN { get; set; }
-    public List<string> AdditionalISBNs { get; set; } = null!;
+    public List<string> AdditionalISBNs { get; set; } = [];
 
     public DateTime? ReleaseDate { get; set; }
     public string? Publisher { get; set; }
