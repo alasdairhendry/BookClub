@@ -1,9 +1,8 @@
-using System.Reflection;
 using API.Services;
 using Data;
+using Data.Models.Dbo;
 using Domain.Interfaces;
 using Domain.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -17,7 +16,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 // Configure Database & Identity Services
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase("AppDatabase"));
 builder.Services.AddAuthorization();
-builder.Services.AddIdentityApiEndpoints<IdentityUser>().AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddIdentityApiEndpoints<ApplicationUserDbo>().AddEntityFrameworkStores<ApplicationDbContext>();
 
 // Adds endpoints for minimal api controllers used in app.MapIdentityApi<IdentityUser>();
 // builder.Services.AddEndpointsApiExplorer();
