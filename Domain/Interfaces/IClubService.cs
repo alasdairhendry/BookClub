@@ -10,4 +10,5 @@ public interface IClubService
     Task<ResultState> DeleteClub(Guid? id);
     Task<ResultState<ClubDto?>> GetClub(Guid? id);
     Task<ResultState<List<ClubDto>>> GetClubs();
+    Task<ResultState<List<ClubMembershipDto>>> GetMemberships(Guid? id);
 }

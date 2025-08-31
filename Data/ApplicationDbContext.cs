@@ -20,6 +20,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUserDbo, Identi
             .WithMany(e => e.ClubMemberships)
             .HasForeignKey(e => e.ClubId)
             .IsRequired();
+        
+        builder.Entity<ClubMembershipDbo>()
+            .HasOne(e => e.User)
+            .WithMany(e => e.ClubMemberships)
+            .HasForeignKey(e => e.UserId)
+            .IsRequired();
     }
 
     public DbSet<ClubActivityDbo> Activities { get; set; }

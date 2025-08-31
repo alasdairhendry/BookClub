@@ -39,19 +39,28 @@ public class GenericRepository<TEntity> where TEntity : class
         }
     }
 
-    public virtual TEntity? GetByID(object? id)
+    public virtual async Task<TEntity?> FilterAsSingleAsync(Expression<Func<TEntity, bool>>? filter = null, string includeProperties = "")
     {
-        if (id is null)
-            return null;
-        
-        return dbSet.Find(id);
+        IQueryable<TEntity> query = dbSet;
+
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+
+        foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+        {
+            query = query.Include(includeProperty);
+        }
+
+        return await query.FirstOrDefaultAsync();
     }
-    
+
     public virtual async Task<TEntity?> GetByIDAsync(object? id)
     {
         if (id is null)
             return null;
-        
+
         return await dbSet.FindAsync(id);
     }
 
@@ -59,7 +68,7 @@ public class GenericRepository<TEntity> where TEntity : class
     {
         dbSet.Add(entity);
     }
-    
+
     public virtual async Task InsertAsync(TEntity entity)
     {
         await dbSet.AddAsync(entity);

@@ -38,15 +38,7 @@ public class ClubService : IClubService
             if (result is null)
                 return ResultState<ClubDto?>.Failed(null, "Club not found");
 
-            ClubDto club = new ClubDto
-            {
-                Id = result.Id,
-                Name = result.Name,
-                Motto = result.Motto,
-                IsPrivate = result.IsPrivate,
-                ImageUrl = result.ImageUrl,
-                MembershipIds = result.ClubMemberships.Select(x => x.Id).ToList(),
-            };
+            ClubDto club = ClubDto.FromDatabaseObject(result);
 
             return ResultState<ClubDto?>.Success(club);
         }
@@ -69,17 +61,47 @@ public class ClubService : IClubService
             using var work = new UnitOfWork(_dbContext);
             var result = await work.ClubRepository.GetAsync(includeProperties: "ClubMemberships");
 
-            List<ClubDto> clubs = result.Take(20).Select(x => new ClubDto()
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Motto = x.Motto,
-                IsPrivate = x.IsPrivate,
-                ImageUrl = x.ImageUrl,
-                MembershipIds = x.ClubMemberships.Select(y => y.Id).ToList(),
-            }).ToList();
+            List<ClubDto> clubs = result.Take(20).Select(ClubDto.FromDatabaseObject).ToList();
 
             return ResultState<List<ClubDto>>.Success(clubs);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<ResultState<List<ClubMembershipDto>>> GetMemberships(Guid? id)
+    {
+        try
+        {
+            var user = await _httpContextService.ContextUserIsActiveAsync();
+
+            if (user.Succeeded == false || user.Data is null)
+                return ResultState<List<ClubMembershipDto>>.Failed([], user.PublicMessage);
+
+            using var work = new UnitOfWork(_dbContext);
+            var club = await work.ClubRepository.FilterAsSingleAsync(x => x.Id == id, includeProperties: "ClubMemberships");
+
+            if(club is null)
+                return ResultState<List<ClubMembershipDto>>.Failed([], "Club not found");
+
+            var clubMemberships = new List<ClubMembershipDto>();
+            
+            foreach (var clubMembership in club.ClubMemberships)
+            {
+                var membership = await work.ClubMembershipRepository.GetByIDAsync(clubMembership.Id);
+
+                if (membership is null)
+                    continue;
+                
+                var dto = ClubMembershipDto.FromDatabaseObject(membership);
+
+                clubMemberships.Add(dto);
+            }
+
+            return ResultState<List<ClubMembershipDto>>.Success(clubMemberships);
         }
         catch (Exception e)
         {

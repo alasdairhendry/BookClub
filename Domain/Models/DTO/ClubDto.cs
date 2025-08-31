@@ -1,3 +1,5 @@
+using Data.Models.Dbo;
+
 namespace Domain.Models.DTO;
 
 public class ClubDto
@@ -10,4 +12,17 @@ public class ClubDto
     public bool IsPrivate { get; set; } = true;
 
     public List<Guid> MembershipIds { get; set; } = [];
+
+    public static ClubDto FromDatabaseObject(ClubDbo? model)
+    {
+        return new ClubDto
+        {
+            Id = model.Id,
+            Name = model.Name,
+            Motto = model.Motto,
+            IsPrivate = model.IsPrivate,
+            ImageUrl = model.ImageUrl,
+            MembershipIds = model.ClubMemberships.Select(x => x.Id).ToList(),
+        };
+    }
 }

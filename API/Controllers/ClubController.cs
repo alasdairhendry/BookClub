@@ -58,6 +58,25 @@ public class ClubController : ControllerBase
         }
     }
     
+    [HttpGet("GetClubMemberships")]
+    public async Task<IActionResult> GetClubMemberships(Guid? id)
+    {
+        try
+        {
+            var result = await _clubService.GetMemberships(id);
+
+            if (result.Succeeded)
+                return Ok(result.Data);
+
+            return _apiResponseFactory.BadRequest(result.PublicMessage);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return _apiResponseFactory.InternalServerError();
+        }
+    }
+    
     [HttpPost("CreateClub")]
     public async Task<IActionResult> CreateClub(ClubCreateDto model)
     {
