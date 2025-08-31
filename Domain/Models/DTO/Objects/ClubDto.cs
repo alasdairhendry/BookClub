@@ -1,6 +1,6 @@
 using Data.Models.Dbo;
 
-namespace Domain.Models.DTO;
+namespace Domain.Models.DTO.Objects;
 
 public class ClubDto
 {
@@ -13,7 +13,7 @@ public class ClubDto
 
     public List<Guid> MembershipIds { get; set; } = [];
 
-    public static ClubDto FromDatabaseObject(ClubDbo? model)
+    public static ClubDto FromDatabaseObject(ClubDbo model)
     {
         return new ClubDto
         {

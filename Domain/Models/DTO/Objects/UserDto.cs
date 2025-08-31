@@ -1,6 +1,6 @@
 using Data.Models.Dbo;
 
-namespace Domain.Models.DTO;
+namespace Domain.Models.DTO.Objects;
 
 public class UserDto
 {

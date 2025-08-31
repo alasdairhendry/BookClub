@@ -3,6 +3,8 @@ using Data.Models.Dbo;
 using Domain.DataAccess;
 using Domain.Interfaces;
 using Domain.Models.DTO;
+using Domain.Models.DTO.Actions;
+using Domain.Models.DTO.Objects;
 using Domain.Models.State;
 
 namespace Domain.Services;
@@ -162,8 +164,8 @@ public class ClubService : IClubService
             if (user.Succeeded == false || user.Data is null)
                 return ResultState.Failed(user.PublicMessage);
 
-            if ((await _permissionService.ContextUserHasAccessToAsync(model.Id)).Succeeded == false)
-                return ResultState.Failed("User does not have access to this resource");
+            if ((await _permissionService.ContextUserIsAdminOfAsync(model.Id)).Succeeded == false)
+                return ResultState.Failed("User does not have admin access to this resource");
 
             using var work = new UnitOfWork(_dbContext);
 

@@ -1,33 +1,35 @@
 using API.Services;
 using Domain.Interfaces;
-using Domain.Models.DTO;
 using Domain.Models.DTO.Actions;
+using Domain.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class AuthController : ControllerBase
+[Authorize]
+public class InvitationController : ControllerBase
 {
     private readonly ApiResponseFactory _apiResponseFactory;
-    private readonly IUserService _userService;
+    private readonly IInvitationService _invitationService;
 
-    public AuthController(ApiResponseFactory apiResponseFactory, IUserService userService)
+    public InvitationController(ApiResponseFactory apiResponseFactory, IInvitationService invitationService)
     {
         _apiResponseFactory = apiResponseFactory;
-        _userService = userService;
+        _invitationService = invitationService;
     }
-    
-    [HttpPost("Register")]
-    public async Task<IActionResult> Register(UserRegistrationModel model)
+
+    [HttpPost("SendInvitation")]
+    public async Task<IActionResult> SendInvitation(InvitationCreateDto model)
     {
         try
         {
-            var result = await _userService.Register(model);
+            var result = await _invitationService.SendInvitation(model);
 
             if (result.Succeeded)
-                return Created();
+                return Ok(result.Data);
 
             return _apiResponseFactory.BadRequest(result.PublicMessage);
         }
@@ -37,14 +39,14 @@ public class AuthController : ControllerBase
             return _apiResponseFactory.InternalServerError();
         }
     }
-    
-    [HttpPost("Login")]
-    public async Task<IActionResult> Login(UserLoginModel model)
+
+    [HttpPatch("AcceptInvitation")]
+    public async Task<IActionResult> AcceptInvitation(Guid? invitationId)
     {
         try
         {
-            var result = await _userService.Login(model);
-            
+            var result = await _invitationService.AcceptInvitation(invitationId);
+
             if (result.Succeeded)
                 return Ok(result.Data);
 
@@ -57,13 +59,13 @@ public class AuthController : ControllerBase
         }
     }
     
-    [HttpPost("GetToken")]
-    public async Task<IActionResult> GetToken(UserLoginModel model)
+    [HttpPatch("DeclineInvitation")]
+    public async Task<IActionResult> DeclineInvitation(Guid? invitationId)
     {
         try
         {
-            var result = await _userService.GetToken(model);
-            
+            var result = await _invitationService.DeclineInvitation(invitationId);
+
             if (result.Succeeded)
                 return Ok(result.Data);
 
@@ -75,4 +77,5 @@ public class AuthController : ControllerBase
             return _apiResponseFactory.InternalServerError();
         }
     }
+    
 }

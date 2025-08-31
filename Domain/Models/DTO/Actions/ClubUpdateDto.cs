@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace Domain.Models.DTO;
+namespace Domain.Models.DTO.Actions;
 
 public class ClubUpdateDto
 {

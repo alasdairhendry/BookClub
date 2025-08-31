@@ -16,6 +16,7 @@ builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IClubService, ClubService>();
 builder.Services.AddScoped<IHttpContextService, HttpContextService>();
+builder.Services.AddScoped<IInvitationService, InvitationService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IUserService, UserService>();
 

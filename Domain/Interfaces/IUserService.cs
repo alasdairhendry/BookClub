@@ -1,5 +1,6 @@
 using Data.Models.Dbo;
 using Domain.Models.DTO;
+using Domain.Models.DTO.Actions;
 using Domain.Models.State;
 
 namespace Domain.Interfaces;

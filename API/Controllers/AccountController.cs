@@ -24,7 +24,7 @@ public class AccountController : ControllerBase
     {
         try
         {
-            var result = await _accountService.GetUserDetails(id);
+            var result = await _accountService.GetUserDetailsAsync(id);
 
             if (result.Succeeded)
                 return Ok(result.Data);
@@ -43,7 +43,26 @@ public class AccountController : ControllerBase
     {
         try
         {
-            var result = await _accountService.GetUserClubMemberships(id);
+            var result = await _accountService.GetUserClubMembershipsAsync(id);
+
+            if (result.Succeeded)
+                return Ok(result.Data);
+
+            return _apiResponseFactory.BadRequest(result.PublicMessage);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return _apiResponseFactory.InternalServerError();
+        }
+    }
+    
+    [HttpGet("GetUserClubInvitations")]
+    public async Task<IActionResult> GetUserClubInvitations(Guid? id)
+    {
+        try
+        {
+            var result = await _accountService.GetUserClubInvitationsAsync(id);
 
             if (result.Succeeded)
                 return Ok(result.Data);

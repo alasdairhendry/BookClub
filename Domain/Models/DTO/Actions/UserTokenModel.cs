@@ -1,4 +1,4 @@
-namespace Domain.Models.DTO;
+namespace Domain.Models.DTO.Actions;
 
 public class UserTokenModel
 {

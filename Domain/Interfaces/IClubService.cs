@@ -1,4 +1,6 @@
 using Domain.Models.DTO;
+using Domain.Models.DTO.Actions;
+using Domain.Models.DTO.Objects;
 using Domain.Models.State;
 
 namespace Domain.Interfaces;
