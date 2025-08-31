@@ -35,7 +35,7 @@ public class ClubService : IClubService
                 return ResultState<ClubDto?>.Failed(null, "User does not have access to this resource");
 
             using var work = new UnitOfWork(_dbContext);
-            var result = await work.ClubRepository.GetByIDAsync(id);
+            var result = await work.ClubRepository.FilterAsSingleAsync(x => x.Id == id, includeProperties: "ClubMemberships");
 
             if (result is null)
                 return ResultState<ClubDto?>.Failed(null, "Club not found");
@@ -84,20 +84,20 @@ public class ClubService : IClubService
                 return ResultState<List<ClubMembershipDto>>.Failed([], user.PublicMessage);
 
             using var work = new UnitOfWork(_dbContext);
-            var club = await work.ClubRepository.FilterAsSingleAsync(x => x.Id == id, includeProperties: "ClubMemberships");
+            var club = await work.ClubRepository.FilterAsSingleAsync(x => x.Id == id, includeProperties: "ClubMemberships.User");
 
-            if(club is null)
+            if (club is null)
                 return ResultState<List<ClubMembershipDto>>.Failed([], "Club not found");
 
             var clubMemberships = new List<ClubMembershipDto>();
-            
+
             foreach (var clubMembership in club.ClubMemberships)
             {
                 var membership = await work.ClubMembershipRepository.GetByIDAsync(clubMembership.Id);
 
                 if (membership is null)
                     continue;
-                
+
                 var dto = ClubMembershipDto.FromDatabaseObject(membership);
 
                 clubMemberships.Add(dto);
@@ -140,6 +140,7 @@ public class ClubService : IClubService
             {
                 ClubId = club.Id,
                 UserId = user.Data.Id,
+                MemberSince = DateTime.UtcNow,
                 IsAdmin = true
             };
 
@@ -183,6 +184,78 @@ public class ClubService : IClubService
             club.IsPrivate = model.IsPrivate;
 
             work.ClubRepository.Update(club);
+            await work.SaveAsync();
+
+            return ResultState.Success();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<ResultState> UpdateMemberRole(Guid? userId, Guid? clubId, bool isAdmin)
+    {
+        try
+        {
+            var admin = await _httpContextService.ContextUserIsActiveAsync();
+
+            if (admin.Succeeded == false || admin.Data is null)
+                return ResultState.Failed(admin.PublicMessage);
+
+            if ((await _permissionService.ContextUserIsAdminOfAsync(clubId)).Succeeded == false)
+                return ResultState.Failed("User does not have admin access to this resource");
+
+            using var work = new UnitOfWork(_dbContext);
+
+            var membership = await work.ClubMembershipRepository.FilterAsSingleAsync(x => x.ClubId == clubId && x.UserId == userId);
+
+            if (membership is null)
+                return ResultState.Failed("User is not a member of this club");
+
+            if (isAdmin == membership.IsAdmin)
+            {
+                if (isAdmin)
+                    return ResultState.Failed("User is already an admin");
+                else
+                    return ResultState.Failed("User already has a member role");
+            }
+
+            membership.IsAdmin = isAdmin;
+            
+            work.ClubMembershipRepository.Update(membership);
+            await work.SaveAsync();
+
+            return ResultState.Success();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<ResultState> RemoveMemberFromClub(Guid? userId, Guid? clubId)
+    {
+        try
+        {
+            var admin = await _httpContextService.ContextUserIsActiveAsync();
+
+            if (admin.Succeeded == false || admin.Data is null)
+                return ResultState.Failed(admin.PublicMessage);
+
+            if ((await _permissionService.ContextUserIsAdminOfAsync(clubId)).Succeeded == false)
+                return ResultState.Failed("User does not have admin access to this resource");
+
+            using var work = new UnitOfWork(_dbContext);
+
+            var membership = await work.ClubMembershipRepository.FilterAsSingleAsync(x => x.ClubId == clubId && x.UserId == userId);
+
+            if (membership is null)
+                return ResultState.Failed("User is not a member of this club");
+
+            work.ClubMembershipRepository.Delete(membership);
             await work.SaveAsync();
 
             return ResultState.Success();

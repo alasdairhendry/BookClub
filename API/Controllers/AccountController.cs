@@ -20,7 +20,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet("GetUserDetails")]
-    public async Task<IActionResult> GetUserDetails(Guid? id)
+    public async Task<IActionResult> GetUserDetails(Guid id)
     {
         try
         {
@@ -39,7 +39,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet("GetUserClubMemberships")]
-    public async Task<IActionResult> GetUserClubMemberships(Guid? id)
+    public async Task<IActionResult> GetUserClubMemberships(Guid id)
     {
         try
         {
@@ -58,11 +58,30 @@ public class AccountController : ControllerBase
     }
     
     [HttpGet("GetUserClubInvitations")]
-    public async Task<IActionResult> GetUserClubInvitations(Guid? id)
+    public async Task<IActionResult> GetUserClubInvitations(Guid id, bool activeOnly = false)
     {
         try
         {
-            var result = await _accountService.GetUserClubInvitationsAsync(id);
+            var result = await _accountService.GetUserClubInvitationsAsync(id, activeOnly);
+
+            if (result.Succeeded)
+                return Ok(result.Data);
+
+            return _apiResponseFactory.BadRequest(result.PublicMessage);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return _apiResponseFactory.InternalServerError();
+        }
+    }
+
+    [HttpDelete("LeaveClub")]
+    public async Task<IActionResult> LeaveClub(Guid clubId)
+    {
+        try
+        {
+            var result = await _accountService.LeaveClub(clubId);
 
             if (result.Succeeded)
                 return Ok(result.Data);

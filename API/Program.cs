@@ -20,6 +20,8 @@ builder.Services.AddScoped<IInvitationService, InvitationService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+builder.Services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
+
 // Configure Database & Identity Services
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase("AppDatabase"));
 builder.Services.AddAuthorization();
@@ -58,7 +60,6 @@ builder.Services.AddSwaggerGen(options =>
                 Scheme = "oauth2",
                 Name = "Bearer",
                 In = ParameterLocation.Header,
-
             },
             new List<string>()
         }
@@ -81,18 +82,23 @@ if (app.Environment.IsDevelopment())
         options.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
         {
             // Configure base path
-            swaggerDoc.Servers = new List<OpenApiServer>{ new() { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}{basePath}" } };
-            
+            swaggerDoc.Servers = new List<OpenApiServer> { new() { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}{basePath}" } };
+
             // Remove existing base path from endpoints
             OpenApiPaths paths = new();
             foreach (var path in swaggerDoc.Paths)
             {
                 paths.Add(path.Key.Replace(basePath, "/"), path.Value);
             }
+
             swaggerDoc.Paths = paths;
         });
     });
     app.UseSwaggerUI();
+
+    using var scope = app.Services.CreateScope();
+    var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
+    await seeder.SeedClubInvitations();
 }
 
 // Adds authentication endpoints 

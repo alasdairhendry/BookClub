@@ -41,7 +41,7 @@ public class InvitationController : ControllerBase
     }
 
     [HttpPatch("AcceptInvitation")]
-    public async Task<IActionResult> AcceptInvitation(Guid? invitationId)
+    public async Task<IActionResult> AcceptInvitation(Guid invitationId)
     {
         try
         {
@@ -60,7 +60,7 @@ public class InvitationController : ControllerBase
     }
     
     [HttpPatch("DeclineInvitation")]
-    public async Task<IActionResult> DeclineInvitation(Guid? invitationId)
+    public async Task<IActionResult> DeclineInvitation(Guid invitationId)
     {
         try
         {

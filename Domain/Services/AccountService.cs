@@ -3,16 +3,21 @@ using Domain.DataAccess;
 using Domain.Interfaces;
 using Domain.Models.DTO.Objects;
 using Domain.Models.State;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Domain.Services;
 
 public class AccountService : IAccountService
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IHttpContextService _httpContextService;
 
-    public AccountService(ApplicationDbContext dbContext)
+    public AccountService(ApplicationDbContext dbContext, IServiceProvider serviceProvider, IHttpContextService httpContextService)
     {
         _dbContext = dbContext;
+        _serviceProvider = serviceProvider;
+        _httpContextService = httpContextService;
     }
 
     public async Task<ResultState<UserDto?>> GetUserDetailsAsync(Guid? userId)
@@ -92,34 +97,34 @@ public class AccountService : IAccountService
         }
     }
     
-    public async Task<ResultState<List<InvitationDto>>> GetUserClubInvitationsAsync(Guid? userId)
+    public async Task<ResultState<List<InvitationDto>>> GetUserClubInvitationsAsync(Guid? userId, bool activeOnly = false)
     {
         try
         {
             using var work = new UnitOfWork(_dbContext);
 
-            var user = await work.ApplicationUserRepository.FilterAsSingleAsync(x=>x.Id == userId, "Invitations");
+            var user = await work.ApplicationUserRepository.FilterAsSingleAsync(x=>x.Id == userId, "Invitations.TargetClub,Invitations.FromUser");
 
             if (user is null)
                 return ResultState<List<InvitationDto>>.Failed([], "User does not exist");
 
-            var invitations = new List<InvitationDto>();
+            var response = new List<InvitationDto>();
+
+            var invitations = user.Invitations;
+            
+            if(activeOnly)
+                invitations = user.Invitations.Where(x=>x.DateResponded == null).ToList();
             
             // Todo - batch this
-            foreach (var invitation in user.Invitations)
+            foreach (var invitation in invitations)
             {
                 if (invitation is null)
                     continue;
                 
-                // For some reason we have to do this ?? It must somehow track the changes on the club
-                // If we don't do it, the TargetClubId is filled but the navigation property doesnt link up???
-                // Weird that the TargetUser and FromUser aren't an issue???
-                var club = await work.ClubRepository.GetByIDAsync(invitation.TargetClubId);
-
-                invitations.Add(InvitationDto.FromDatabaseObject(invitation));
+                response.Add(InvitationDto.FromDatabaseObject(invitation));
             }
 
-            return ResultState<List<InvitationDto>>.Success(invitations);
+            return ResultState<List<InvitationDto>>.Success(response);
         }
         catch (Exception e)
         {
@@ -128,11 +133,42 @@ public class AccountService : IAccountService
         }
     }
 
+    public async Task<ResultState> LeaveClub(Guid? clubId)
+    {
+        try
+        {
+            var userResult = await _httpContextService.ContextUserIsActiveAsync();
+
+            if (userResult.Succeeded == false || userResult.Data is null)
+                return ResultState.Failed(userResult.PublicMessage);
+
+            using var work = new UnitOfWork(_dbContext);
+
+            var membership = await work.ClubMembershipRepository.FilterAsSingleAsync(x=>x.ClubId == clubId && x.UserId == userResult.Data.Id);
+
+            if (membership is null)
+                return ResultState.Failed("User is not a member of this club");
+
+            work.ClubMembershipRepository.Delete(membership);
+            await work.SaveAsync();
+
+            return ResultState.Success();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+    
     public async Task<ResultState> IsMemberOfClubAsync(Guid? userId, Guid clubId)
     {
         try
         {
-            using var work = new UnitOfWork(_dbContext);
+            await using var scope = _serviceProvider.CreateAsyncScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            
+            using var work = new UnitOfWork(dbContext);
             
             if (await work.ClubMembershipRepository.FilterAsSingleAsync(x => x.ClubId == clubId && x.UserId == userId) is not null)
                 return ResultState.Success();

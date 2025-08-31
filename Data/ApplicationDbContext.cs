@@ -33,12 +33,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUserDbo, Identi
             .HasForeignKey(e => e.TargetClubId)
             .IsRequired();
         
-        builder.Entity<InvitationDbo>()
-            .HasOne(e => e.TargetUser)
-            .WithMany(e => e.Invitations)
+        builder.Entity<ApplicationUserDbo>()
+            .HasMany(e => e.Invitations)
+            .WithOne(e => e.TargetUser)
             .HasForeignKey(e => e.TargetUserId)
             .IsRequired();
-        
     }
 
     public DbSet<ClubActivityDbo> Activities { get; set; }

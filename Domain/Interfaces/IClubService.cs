@@ -13,4 +13,6 @@ public interface IClubService
     Task<ResultState<ClubDto?>> GetClub(Guid? id);
     Task<ResultState<List<ClubDto>>> GetClubs();
     Task<ResultState<List<ClubMembershipDto>>> GetMemberships(Guid? id);
+    Task<ResultState> RemoveMemberFromClub(Guid? userId, Guid? clubId);
+    Task<ResultState> UpdateMemberRole(Guid? userId, Guid? clubId, bool isAdmin);
 }

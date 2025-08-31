@@ -74,14 +74,14 @@ public class GenericRepository<TEntity> where TEntity : class
         await dbSet.AddAsync(entity);
     }
 
-    public virtual async Task DeleteAsync(object id)
+    public virtual async Task DeleteAsync(object? id)
     {
         TEntity? entityToDelete = await dbSet.FindAsync(id);
 
         if (entityToDelete != null)
             Delete(entityToDelete);
     }
-
+    
     public virtual void Delete(TEntity entityToDelete)
     {
         if (context.Entry(entityToDelete).State == EntityState.Detached)

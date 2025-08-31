@@ -9,6 +9,7 @@ public class ClubMembershipDbo
     
     public Guid ClubId { get; set; }
     public ClubDbo? Club { get; set; }
-    
+
+    public DateTime MemberSince { get; set; } 
     public bool IsAdmin { get; set; } = false;
 }

@@ -10,4 +10,5 @@ public interface IUserService
     Task<ResultState> Register(UserRegistrationModel model);
     Task<ResultState<Guid?>> Login(UserLoginModel model);
     Task<ResultState<UserTokenModel>> GetToken(UserLoginModel model);
+    Task<ResultState> RegisterWithSpecificId(UserRegistrationModel model, Guid userId);
 }

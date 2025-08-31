@@ -20,7 +20,7 @@ public class InvitationDto
         return new InvitationDto
         {
             Id = model.Id,
-            FromUser = UserDto.FromDatabaseObject(model.TargetUser!),
+            FromUser = UserDto.FromDatabaseObject(model.FromUser!),
             TargetUser = UserDto.FromDatabaseObject(model.TargetUser!),
             TargetClub = ClubDto.FromDatabaseObject(model.TargetClub!),
             DateCreated = model.DateCreated,

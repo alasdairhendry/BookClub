@@ -13,36 +13,32 @@ public class InvitationService : IInvitationService
     private readonly ApplicationDbContext _dbContext;
     private readonly IHttpContextService _httpContextService;
     private readonly IPermissionService _permissionService;
-    private readonly IServiceProvider _provider;
+    private readonly IAccountService _accountService;
 
-    public InvitationService(ApplicationDbContext dbContext, IHttpContextService httpContextService, IPermissionService permissionService, IServiceProvider provider)
+    public InvitationService(ApplicationDbContext dbContext, IHttpContextService httpContextService,
+        IPermissionService permissionService, IServiceProvider provider, IAccountService accountService)
     {
         _dbContext = dbContext;
         _httpContextService = httpContextService;
         _permissionService = permissionService;
-        _provider = provider;
+        _accountService = accountService;
     }
 
-    public async Task<ResultState> SendInvitation(InvitationCreateDto model)
+    public async Task<ResultState<Guid?>> SendInvitation(InvitationCreateDto model)
     {
         try
         {
             var user = await _httpContextService.ContextUserIsActiveAsync();
 
             if (user.Succeeded == false || user.Data is null)
-                return ResultState.Failed(user.PublicMessage);
+                return ResultState<Guid?>.Failed(null, user.PublicMessage);
 
             if ((await _permissionService.ContextUserIsAdminOfAsync(model.ClubId)).Succeeded == false)
-                return ResultState.Failed("User does not have admin access to this resource");
+                return ResultState<Guid?>.Failed(null, "User does not have admin access to this resource");
 
             // Check user isn't already in club
-            using (var scope = _provider.CreateScope())
-            {
-                var _accountService = scope.ServiceProvider.GetRequiredService<IAccountService>();
-
-                if ((await _accountService.IsMemberOfClubAsync(model.ApplicationUserId, model.ClubId)).Succeeded)
-                    return ResultState.Failed("User is already a member of this club");
-            }
+            if ((await _accountService.IsMemberOfClubAsync(model.ApplicationUserId, model.ClubId)).Succeeded)
+                return ResultState<Guid?>.Failed(null, "User is already a member of this club");
 
             using var work = new UnitOfWork(_dbContext);
 
@@ -51,7 +47,7 @@ public class InvitationService : IInvitationService
                     x => x.DateResponded == null &&
                          x.TargetUserId == model.ApplicationUserId &&
                          x.TargetClubId == model.ClubId) != null)
-                return ResultState.Failed("User has already been invited");
+                return ResultState<Guid?>.Failed(null, "User has already been invited");
 
             InvitationDbo invitation = new InvitationDbo
             {
@@ -62,15 +58,9 @@ public class InvitationService : IInvitationService
             };
 
             await work.InvitationRepository.InsertAsync(invitation);
-
-            // For some reason we have to do this ?? It must somehow track the changes on the club
-            // If we don't do it, the TargetClubId is filled but the navigation property doesnt link up???
-            // Weird that the TargetUser and FromUser aren't an issue???
-            var club = await work.ClubRepository.GetByIDAsync(model.ClubId);
-
             await work.SaveAsync();
 
-            return ResultState.Success();
+            return ResultState<Guid?>.Success(invitation.Id);
         }
         catch (Exception e)
         {
@@ -97,15 +87,10 @@ public class InvitationService : IInvitationService
 
             if (user.Data.Id != invitation.TargetUserId)
                 return ResultState.Failed("User cannot accept this invitation");
-
+            
             // Check user isn't already in club
-            using (var scope = _provider.CreateScope())
-            {
-                var _accountService = scope.ServiceProvider.GetRequiredService<IAccountService>();
-
-                if ((await _accountService.IsMemberOfClubAsync(invitation.TargetUserId, invitation.TargetClubId)).Succeeded)
-                    return ResultState.Failed("User is already a member of this club");
-            }
+            if ((await _accountService.IsMemberOfClubAsync(invitation.TargetUserId, invitation.TargetClubId)).Succeeded)
+                return ResultState.Failed("User is already a member of this club");
 
             invitation.DateResponded = DateTime.UtcNow;
             invitation.Response = true;
@@ -117,6 +102,7 @@ public class InvitationService : IInvitationService
             {
                 ClubId = invitation.TargetClubId,
                 UserId = invitation.TargetUserId,
+                MemberSince = DateTime.UtcNow,
                 IsAdmin = false
             };
 
@@ -153,13 +139,8 @@ public class InvitationService : IInvitationService
                 return ResultState.Failed("User cannot decline this invitation");
 
             // Check user isn't already in club
-            using (var scope = _provider.CreateScope())
-            {
-                var _accountService = scope.ServiceProvider.GetRequiredService<IAccountService>();
-
-                if ((await _accountService.IsMemberOfClubAsync(invitation.TargetUserId, invitation.TargetClubId)).Succeeded)
-                    return ResultState.Failed("User is already a member of this club");
-            }
+            if ((await _accountService.IsMemberOfClubAsync(invitation.TargetUserId, invitation.TargetClubId)).Succeeded)
+                return ResultState.Failed("User is already a member of this club");
 
             invitation.DateResponded = DateTime.UtcNow;
             invitation.Response = false;
@@ -176,11 +157,4 @@ public class InvitationService : IInvitationService
             throw;
         }
     }
-}
-
-public interface IInvitationService
-{
-    Task<ResultState> SendInvitation(InvitationCreateDto model);
-    Task<ResultState> AcceptInvitation(Guid? invitationId);
-    Task<ResultState> DeclineInvitation(Guid? invitationId);
 }
