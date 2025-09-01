@@ -36,7 +36,7 @@ public class AuthController : ControllerBase
             if (result.Succeeded)
                 return Created();
 
-            return _apiResponseFactory.BadRequest(result.PublicMessage);
+            return _apiResponseFactory.FromResult(result);
         }
         catch (Exception e)
         {
@@ -55,7 +55,7 @@ public class AuthController : ControllerBase
             if (result.Succeeded)
                 return Ok(result.Data);
 
-            return _apiResponseFactory.BadRequest(result.PublicMessage);
+            return _apiResponseFactory.FromResult(result);
         }
         catch (Exception e)
         {
@@ -74,7 +74,7 @@ public class AuthController : ControllerBase
             if (result.Succeeded)
                 return Ok(result.Data);
 
-            return _apiResponseFactory.BadRequest(result.PublicMessage);
+            return _apiResponseFactory.FromResult(result);
         }
         catch (Exception e)
         {

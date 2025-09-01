@@ -1,3 +1,4 @@
+using Domain.Enums;
 using Domain.Models.DTO.Objects;
 
 namespace Domain.Models.State;
@@ -14,8 +15,8 @@ public class ResultStateId : ResultState<EntityIdDto?>
         return new ResultStateId { Succeeded = false, Data = new EntityIdDto(null) };
     }
     
-    public static ResultStateId Failed(string? publicMessage)
+    public static ResultStateId Failed(ResultErrorType errorType, string? publicMessage)
     {
-        return new ResultStateId { Succeeded = false, Data = new EntityIdDto(null) , PublicMessage = publicMessage };
+        return new ResultStateId { Succeeded = false, Data = new EntityIdDto(null), ErrorType = errorType, PublicMessage = publicMessage };
     }
 }

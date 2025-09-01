@@ -1,5 +1,6 @@
 using Data;
 using Domain.DataAccess;
+using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Models.DTO.Objects;
 using Domain.Models.State;
@@ -29,7 +30,7 @@ public class AccountService : IAccountService
             var user = await work.ApplicationUserRepository.GetByIDAsync(userId);
 
             if (user is null)
-                return ResultState<UserDto?>.Failed(null, "User does not exist");
+                return ResultState<UserDto?>.Failed(null, ResultErrorType.NotFound, "User does not exist");
 
             var dto = new UserDto()
             {
@@ -70,7 +71,7 @@ public class AccountService : IAccountService
             var user = await work.ApplicationUserRepository.FilterAsSingleAsync(x=>x.Id == userId, "ClubMemberships");
 
             if (user is null)
-                return ResultState<List<ClubDto>>.Failed([], "User does not exist");
+                return ResultState<List<ClubDto>>.Failed([], ResultErrorType.NotFound, "User does not exist");
 
             var memberships = new List<ClubDto>();
             
@@ -106,7 +107,7 @@ public class AccountService : IAccountService
             var user = await work.ApplicationUserRepository.FilterAsSingleAsync(x=>x.Id == userId, "Invitations.TargetClub,Invitations.FromUser");
 
             if (user is null)
-                return ResultState<List<InvitationDto>>.Failed([], "User does not exist");
+                return ResultState<List<InvitationDto>>.Failed([], ResultErrorType.NotFound, "User does not exist");
 
             var response = new List<InvitationDto>();
 
@@ -140,14 +141,14 @@ public class AccountService : IAccountService
             var userResult = await _httpContextService.ContextUserIsActiveAsync();
 
             if (userResult.Succeeded == false || userResult.Data is null)
-                return ResultState.Failed(userResult.PublicMessage);
+                return ResultState.Failed(ResultErrorType.Unauthorised, userResult.PublicMessage);
 
             using var work = new UnitOfWork(_dbContext);
 
             var membership = await work.ClubMembershipRepository.FilterAsSingleAsync(x=>x.ClubId == clubId && x.UserId == userResult.Data.Id);
 
             if (membership is null)
-                return ResultState.Failed("User is not a member of this club");
+                return ResultState.Failed(ResultErrorType.Conflict, "User is not a member of this club");
 
             work.ClubMembershipRepository.Delete(membership);
             await work.SaveAsync();

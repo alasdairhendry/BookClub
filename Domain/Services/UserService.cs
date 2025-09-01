@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using Data;
 using Data.Models.Dbo;
 using Domain.DataAccess;
+using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Models.DTO;
 using Domain.Models.DTO.Actions;
@@ -28,10 +29,10 @@ public class UserService : IUserService
         try
         {
             if (Regex.IsMatch(model.Email, "\\w+([-+.']\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*") == false)
-                return ResultState.Failed("Email is invalid");
+                return ResultState.Failed(ResultErrorType.Validation,"Email is invalid");
 
             if (model.Password != model.ConfirmPassword)
-                return ResultState.Failed("Passwords do not match");
+                return ResultState.Failed(ResultErrorType.Validation,"Passwords do not match");
 
             var user = new ApplicationUserDbo { UserName = model.Username, Email = model.Email, DateCreated = DateTime.UtcNow, LastLogin = DateTime.UtcNow };
             var result = await _signInManager.UserManager.CreateAsync(user, model.Password);
@@ -40,16 +41,16 @@ public class UserService : IUserService
                 return ResultState.Success();
 
             if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.DuplicateUserName)))
-                return ResultState.Failed("Username already exists");
+                return ResultState.Failed(ResultErrorType.Validation,"Username already exists");
 
             if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.InvalidUserName)))
-                return ResultState.Failed("Username is invalid");
+                return ResultState.Failed(ResultErrorType.Validation,"Username is invalid");
 
             if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.DuplicateEmail)))
-                return ResultState.Failed("Email address already exists");
+                return ResultState.Failed(ResultErrorType.Validation,"Email address already exists");
 
             if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.InvalidEmail)))
-                return ResultState.Failed("Email address is not valid");
+                return ResultState.Failed(ResultErrorType.Validation,"Email address is not valid");
 
             // TODO - Define password rules
             if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.PasswordRequiresDigit)) ||
@@ -58,7 +59,7 @@ public class UserService : IUserService
                 result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.PasswordTooShort)) ||
                 result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.PasswordRequiresNonAlphanumeric)) ||
                 result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.PasswordRequiresUniqueChars)))
-                return ResultState.Failed("Password must contain [xxx]");
+                return ResultState.Failed(ResultErrorType.Validation,"Password must contain [xxx]");
 
             throw new Exception(JsonConvert.SerializeObject(result.Errors.ToList()));
         }
@@ -74,10 +75,10 @@ public class UserService : IUserService
         try
         {
             if (Regex.IsMatch(model.Email, "\\w+([-+.']\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*") == false)
-                return ResultState.Failed("Email is invalid");
+                return ResultState.Failed(ResultErrorType.Validation, "Email is invalid");
 
             if (model.Password != model.ConfirmPassword)
-                return ResultState.Failed("Passwords do not match");
+                return ResultState.Failed(ResultErrorType.Validation, "Passwords do not match");
 
             var user = new ApplicationUserDbo { Id = userId, UserName = model.Username, Email = model.Email, DateCreated = DateTime.UtcNow, LastLogin = DateTime.UtcNow };
             var result = await _signInManager.UserManager.CreateAsync(user, model.Password);
@@ -87,7 +88,7 @@ public class UserService : IUserService
 
             if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.DuplicateEmail)) ||
                 result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.DuplicateUserName)))
-                return ResultState.Failed("Email address already exists");
+                return ResultState.Failed(ResultErrorType.Validation, "Email address already exists");
 
             // TODO - Define password rules
             if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.PasswordRequiresDigit)) ||
@@ -96,7 +97,7 @@ public class UserService : IUserService
                 result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.PasswordTooShort)) ||
                 result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.PasswordRequiresNonAlphanumeric)) ||
                 result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.PasswordRequiresUniqueChars)))
-                return ResultState.Failed("Password must contain [xxx]");
+                return ResultState.Failed(ResultErrorType.Validation, "Password must contain [xxx]");
 
             throw new Exception(JsonConvert.SerializeObject(result.Errors.ToList()));
         }
@@ -116,27 +117,27 @@ public class UserService : IUserService
             var user = await _signInManager.UserManager.FindByEmailAsync(model.Email);
 
             if (user is null || user.UserName is null)
-                return ResultStateId.Failed("User not found");
+                return ResultStateId.Failed(ResultErrorType.NotFound, "User not found");
 
             var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, true, false);
+
+            if (result.IsLockedOut)
+                return ResultStateId.Failed(ResultErrorType.Validation, "Account is temporarily locked");
+
+            if (result.IsNotAllowed)
+                return ResultStateId.Failed(ResultErrorType.Validation, "Email has not been confirmed yet");
+
+            if (result.Succeeded == false)
+                return ResultStateId.Failed(ResultErrorType.NotFound, "User not found");
 
             using var work = new UnitOfWork(_dbContext);
             var userStore = await work.ApplicationUserRepository.FilterAsSingleAsync(x => x.Email == model.Email);
 
             if (userStore == null)
-                return ResultStateId.Failed("User not found");
+                return ResultStateId.Failed(ResultErrorType.NotFound, "User not found");
 
             if (result.Succeeded)
                 return ResultStateId.Success(userStore.Id);
-
-            if (result.IsLockedOut)
-                return ResultStateId.Failed("Account is temporarily locked");
-
-            if (result.IsNotAllowed)
-                return ResultStateId.Failed("Email has not been confirmed yet");
-
-            if (result.Succeeded == false)
-                return ResultStateId.Failed("User not found");
 
             throw new Exception(JsonConvert.SerializeObject(result));
         }
@@ -158,10 +159,10 @@ public class UserService : IUserService
                 return ResultState<UserTokenModel>.Success(null!);
 
             if (result.IsLockedOut)
-                return ResultState<UserTokenModel>.Failed(null!, "Account is temporarily locked");
+                return ResultState<UserTokenModel>.Failed(null!, ResultErrorType.Validation, "Account is temporarily locked");
 
             if (result.IsNotAllowed)
-                return ResultState<UserTokenModel>.Failed(null!, "Email has not been confirmed yet");
+                return ResultState<UserTokenModel>.Failed(null!, ResultErrorType.Validation, "Email has not been confirmed yet");
 
             throw new Exception(JsonConvert.SerializeObject(result));
         }

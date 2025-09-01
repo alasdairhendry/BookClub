@@ -31,7 +31,7 @@ public class InvitationController : ControllerBase
             if (result.Succeeded)
                 return Ok(result.Data);
 
-            return _apiResponseFactory.BadRequest(result.PublicMessage);
+            return _apiResponseFactory.FromResult(result);
         }
         catch (Exception e)
         {
@@ -50,7 +50,7 @@ public class InvitationController : ControllerBase
             if (result.Succeeded)
                 return Ok(result.Data);
 
-            return _apiResponseFactory.BadRequest(result.PublicMessage);
+            return _apiResponseFactory.FromResult(result);
         }
         catch (Exception e)
         {
@@ -69,7 +69,7 @@ public class InvitationController : ControllerBase
             if (result.Succeeded)
                 return Ok(result.Data);
 
-            return _apiResponseFactory.BadRequest(result.PublicMessage);
+            return _apiResponseFactory.FromResult(result);
         }
         catch (Exception e)
         {

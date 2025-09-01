@@ -31,7 +31,7 @@ public class ClubController : ControllerBase
             if (result.Succeeded)
                 return Ok(result.Data);
 
-            return _apiResponseFactory.BadRequest(result.PublicMessage);
+            return _apiResponseFactory.FromResult(result);
         }
         catch (Exception e)
         {
@@ -50,7 +50,7 @@ public class ClubController : ControllerBase
             if (result.Succeeded)
                 return Ok(result.Data);
 
-            return _apiResponseFactory.BadRequest(result.PublicMessage);
+            return _apiResponseFactory.FromResult(result);
         }
         catch (Exception e)
         {
@@ -69,7 +69,7 @@ public class ClubController : ControllerBase
             if (result.Succeeded)
                 return Ok(result.Data);
 
-            return _apiResponseFactory.BadRequest(result.PublicMessage);
+            return _apiResponseFactory.FromResult(result);
         }
         catch (Exception e)
         {
@@ -88,7 +88,7 @@ public class ClubController : ControllerBase
             if (result.Succeeded)
                 return Created(result.Data!.Id.ToString(), result.Data);
 
-            return _apiResponseFactory.BadRequest(result.PublicMessage);
+            return _apiResponseFactory.FromResult(result);
         }
         catch (Exception e)
         {
@@ -107,7 +107,7 @@ public class ClubController : ControllerBase
             if (result.Succeeded)
                 return NoContent();
 
-            return _apiResponseFactory.BadRequest(result.PublicMessage);
+            return _apiResponseFactory.FromResult(result);
         }
         catch (Exception e)
         {
@@ -126,7 +126,7 @@ public class ClubController : ControllerBase
             if (result.Succeeded)
                 return Ok(result.Data);
 
-            return _apiResponseFactory.BadRequest(result.PublicMessage);
+            return _apiResponseFactory.FromResult(result);
         }
         catch (Exception e)
         {
@@ -145,7 +145,7 @@ public class ClubController : ControllerBase
             if (result.Succeeded)
                 return Ok(result.Data);
 
-            return _apiResponseFactory.BadRequest(result.PublicMessage);
+            return _apiResponseFactory.FromResult(result);
         }
         catch (Exception e)
         {
@@ -164,7 +164,7 @@ public class ClubController : ControllerBase
             if (result.Succeeded)
                 return NoContent();
 
-            return _apiResponseFactory.BadRequest(result.PublicMessage);
+            return _apiResponseFactory.FromResult(result);
         }
         catch (Exception e)
         {

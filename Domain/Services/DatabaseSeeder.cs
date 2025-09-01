@@ -1,5 +1,6 @@
 using Data;
 using Domain.DataAccess;
+using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Models.DTO.Actions;
 using Domain.Models.State;
@@ -50,7 +51,7 @@ public class DatabaseSeeder : IDatabaseSeeder
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return ResultState.Failed(e.Message);
+            return ResultState.Failed(ResultErrorType.Exception,e.Message);
         }
     }
 }
