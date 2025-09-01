@@ -5,6 +5,7 @@ using Domain.DataAccess;
 using Domain.Interfaces;
 using Domain.Models.DTO;
 using Domain.Models.DTO.Actions;
+using Domain.Models.DTO.Objects;
 using Domain.Models.State;
 using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
@@ -38,9 +39,17 @@ public class UserService : IUserService
             if (result.Succeeded)
                 return ResultState.Success();
 
-            if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.DuplicateEmail)) ||
-                result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.DuplicateUserName)))
+            if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.DuplicateUserName)))
+                return ResultState.Failed("Username already exists");
+
+            if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.InvalidUserName)))
+                return ResultState.Failed("Username is invalid");
+
+            if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.DuplicateEmail)))
                 return ResultState.Failed("Email address already exists");
+
+            if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.InvalidEmail)))
+                return ResultState.Failed("Email address is not valid");
 
             // TODO - Define password rules
             if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.PasswordRequiresDigit)) ||
@@ -97,8 +106,8 @@ public class UserService : IUserService
             throw;
         }
     }
-    
-    public async Task<ResultState<Guid?>> Login(UserLoginModel model)
+
+    public async Task<ResultStateId> Login(UserLoginModel model)
     {
         try
         {
@@ -107,27 +116,27 @@ public class UserService : IUserService
             var user = await _signInManager.UserManager.FindByEmailAsync(model.Email);
 
             if (user is null || user.UserName is null)
-                return ResultState<Guid?>.Failed(null, "User not found");
-            
+                return ResultStateId.Failed("User not found");
+
             var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, true, false);
 
             using var work = new UnitOfWork(_dbContext);
             var userStore = await work.ApplicationUserRepository.FilterAsSingleAsync(x => x.Email == model.Email);
 
             if (userStore == null)
-                return ResultState<Guid?>.Failed(null, "User not found");
+                return ResultStateId.Failed("User not found");
 
             if (result.Succeeded)
-                return ResultState<Guid?>.Success(userStore.Id);
+                return ResultStateId.Success(userStore.Id);
 
             if (result.IsLockedOut)
-                return ResultState<Guid?>.Failed(null, "Account is temporarily locked");
+                return ResultStateId.Failed("Account is temporarily locked");
 
             if (result.IsNotAllowed)
-                return ResultState<Guid?>.Failed(null, "Email has not been confirmed yet");
+                return ResultStateId.Failed("Email has not been confirmed yet");
 
             if (result.Succeeded == false)
-                return ResultState<Guid?>.Failed(null, "User not found");
+                return ResultStateId.Failed("User not found");
 
             throw new Exception(JsonConvert.SerializeObject(result));
         }

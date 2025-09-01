@@ -112,14 +112,14 @@ public class ClubService : IClubService
         }
     }
 
-    public async Task<ResultState<Guid?>> CreateClub(ClubCreateDto model)
+    public async Task<ResultStateId> CreateClub(ClubCreateDto model)
     {
         try
         {
             var user = await _httpContextService.ContextUserIsActiveAsync();
 
             if (user.Succeeded == false || user.Data is null)
-                return ResultState<Guid?>.Failed(null, user.PublicMessage);
+                return ResultStateId.Failed(user.PublicMessage);
 
             using var work = new UnitOfWork(_dbContext);
 
@@ -147,7 +147,7 @@ public class ClubService : IClubService
             await work.ClubMembershipRepository.InsertAsync(membership);
             await work.SaveAsync();
 
-            return ResultState<Guid?>.Success(club.Id);
+            return ResultStateId.Success(club.Id);
         }
         catch (Exception e)
         {

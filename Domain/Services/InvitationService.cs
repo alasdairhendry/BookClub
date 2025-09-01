@@ -3,6 +3,7 @@ using Data.Models.Dbo;
 using Domain.DataAccess;
 using Domain.Interfaces;
 using Domain.Models.DTO.Actions;
+using Domain.Models.DTO.Objects;
 using Domain.Models.State;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,32 +25,36 @@ public class InvitationService : IInvitationService
         _accountService = accountService;
     }
 
-    public async Task<ResultState<Guid?>> SendInvitation(InvitationCreateDto model)
+    public async Task<ResultStateId> SendInvitation(InvitationCreateDto model)
     {
         try
         {
             var user = await _httpContextService.ContextUserIsActiveAsync();
 
             if (user.Succeeded == false || user.Data is null)
-                return ResultState<Guid?>.Failed(null, user.PublicMessage);
+                return ResultStateId.Failed(user.PublicMessage);
 
             if ((await _permissionService.ContextUserIsAdminOfAsync(model.ClubId)).Succeeded == false)
-                return ResultState<Guid?>.Failed(null, "User does not have admin access to this resource");
+                return ResultStateId.Failed("User does not have admin access to this resource");
+
+            using var work = new UnitOfWork(_dbContext);
+
+            // Check club exists
+            if (await work.ClubRepository.GetByIDAsync(model.ClubId) == null)
+                return ResultStateId.Failed("Club does not exist");
 
             // Check user isn't already in club
             if ((await _accountService.IsMemberOfClubAsync(model.ApplicationUserId, model.ClubId)).Succeeded)
-                return ResultState<Guid?>.Failed(null, "User is already a member of this club");
-
-            using var work = new UnitOfWork(_dbContext);
+                return ResultStateId.Failed("User is already a member of this club");
 
             // Check user doesn't already have an open invitation
             if (await work.InvitationRepository.FilterAsSingleAsync(
                     x => x.DateResponded == null &&
                          x.TargetUserId == model.ApplicationUserId &&
                          x.TargetClubId == model.ClubId) != null)
-                return ResultState<Guid?>.Failed(null, "User has already been invited");
+                return ResultStateId.Failed("User has already been invited");
 
-            InvitationDbo invitation = new InvitationDbo
+            InvitationDbo createdInvitation = new InvitationDbo
             {
                 DateCreated = DateTime.UtcNow,
                 FromUserId = user.Data.Id,
@@ -57,10 +62,10 @@ public class InvitationService : IInvitationService
                 TargetUserId = model.ApplicationUserId
             };
 
-            await work.InvitationRepository.InsertAsync(invitation);
+            await work.InvitationRepository.InsertAsync(createdInvitation);
             await work.SaveAsync();
 
-            return ResultState<Guid?>.Success(invitation.Id);
+            return ResultStateId.Success(createdInvitation.Id);
         }
         catch (Exception e)
         {
@@ -87,7 +92,7 @@ public class InvitationService : IInvitationService
 
             if (user.Data.Id != invitation.TargetUserId)
                 return ResultState.Failed("User cannot accept this invitation");
-            
+
             // Check user isn't already in club
             if ((await _accountService.IsMemberOfClubAsync(invitation.TargetUserId, invitation.TargetClubId)).Succeeded)
                 return ResultState.Failed("User is already a member of this club");

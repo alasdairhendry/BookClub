@@ -86,7 +86,7 @@ public class ClubController : ControllerBase
             var result = await _clubService.CreateClub(model);
 
             if (result.Succeeded)
-                return Created(result.Data.ToString(), result.Data);
+                return Created(result.Data!.Id.ToString(), result.Data);
 
             return _apiResponseFactory.BadRequest(result.PublicMessage);
         }
