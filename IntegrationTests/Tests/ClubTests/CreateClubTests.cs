@@ -30,7 +30,7 @@ public class CreateClubTests : InjectableWebApplicationFactory
         };
         
         // Act
-        await AuthoriseSUT();
+        await AuthoriseAdminSUT();
         
         var request = await HttpClient.PostAsJsonAsync("api/v1/Club/CreateClub", club);
         
@@ -55,7 +55,7 @@ public class CreateClubTests : InjectableWebApplicationFactory
         };
         
         // Act
-        await AuthoriseSUT();
+        await AuthoriseAdminSUT();
         
         var request = await HttpClient.PostAsJsonAsync("api/v1/Club/CreateClub", club);
         

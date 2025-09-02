@@ -40,13 +40,13 @@ public class InjectableWebApplicationFactory : WebApplicationFactory<Program>, I
     public async Task InitializeAsync()
     {
         HttpClient = CreateClient();
-        await AuthoriseSUT();
+        await AuthoriseAdminSUT();
     }
 
     /// <summary>
     /// Register and logs in a user account to allow access to restricted endpoints
     /// </summary>
-    protected async Task AuthoriseSUT()
+    protected async Task AuthoriseAdminSUT()
     {
         await Register();
         await Login();

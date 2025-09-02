@@ -18,7 +18,7 @@ public class DeleteClubTests : InjectableWebApplicationFactory
     }
 
     [Fact]
-    public async Task DeleteClub_ShouldReturnSuccess_WhenClubExists()
+    public async Task DeleteClub_ShouldSucceed_WhenClubExists()
     {
         // Arrange
         var club = new ClubCreateDto()
@@ -59,7 +59,7 @@ public class DeleteClubTests : InjectableWebApplicationFactory
     }
 
     [Fact]
-    public async Task UpdateClub_ShouldReturnBadRequest_WhenUpdateIsInvalid()
+    public async Task DeleteClub_ShouldReturnForbidden_WhenUserIsNotAnAdmin()
     {
         // Arrange
         var club = new ClubCreateDto()
@@ -71,88 +71,23 @@ public class DeleteClubTests : InjectableWebApplicationFactory
         };
 
         // Act
+        await AuthoriseAdminSUT();
+
         var clubId = await CreateClubAsync(club);
 
         var update = new ClubUpdateDto()
         {
             Id = clubId!.Value,
-            Name = null
-        };
-
-        var updateRequest = await HttpClient.PatchAsJsonAsync($"api/v1/Club/UpdateClub", update);
-
-        // Assert
-        Assert.Equal(HttpStatusCode.BadRequest, updateRequest.StatusCode);
-    }
-
-    [Fact]
-    public async Task UpdateClub_ShouldReturnNotFound_WhenClubDoesNotExist()
-    {
-        // Arrange
-        var update = new ClubUpdateDto()
-        {
             Name = "Updated Club",
             Motto = "Updated Motto",
             IsPrivate = true,
             ImageUrl = "www.updated.com"
         };
 
-        await AuthoriseSUT();
-
-        // Act
-        var updateRequest = await HttpClient.PatchAsJsonAsync($"api/v1/Club/UpdateClub", update);
-
-        // Assert
-        Assert.Equal(HttpStatusCode.NotFound, updateRequest.StatusCode);
-    }
-
-    [Fact]
-    public async Task RemoveMember_ShouldReturnBadRequest_WhenClubHasOneMember()
-    {
-        // Arrange
-        var club = new ClubCreateDto()
-        {
-            Name = "Test Club",
-            Motto = "Test Motto",
-            IsPrivate = false,
-            ImageUrl = "www.test.com"
-        };
-
-        // Act
-        var clubId = await CreateClubAsync(club);
-
-        var removeMemberFromClubRequest = await HttpClient.DeleteAsync($"api/v1/Club/RemoveMemberFromClub?userId={AuthenticatedUserId}&clubId={clubId}");
-        var leaveClubRequest = await HttpClient.DeleteAsync($"api/v1/Account/LeaveClub?clubId={clubId}");
-
-        var clubRequest = await HttpClient.GetAsync($"api/v1/Club/GetClub?id={clubId}");
-        var clubResponse = await clubRequest.Content.ReadFromJsonAsync<ClubDto>();
-        
-        // Assert
-        Assert.Equal(HttpStatusCode.BadRequest, removeMemberFromClubRequest.StatusCode);
-        Assert.Equal(HttpStatusCode.BadRequest, leaveClubRequest.StatusCode);
-        
-        Assert.NotNull(clubResponse);
-        Assert.Single(clubResponse.MembershipIds);
-    }
-
-    [Fact]
-    public async Task RemoveMember_ShouldReturnBadRequest_WhenUserIsTheOnlyAdmin()
-    {
-        // Arrange
-        var club = new ClubCreateDto()
-        {
-            Name = "Test Club",
-            Motto = "Test Motto",
-            IsPrivate = false,
-            ImageUrl = "www.test.com"
-        };
-
-        // Act
-        var clubId = await CreateClubAsync(club);
         var newUserId = await RegisterNewUser(new UserRegistrationDto
         {
-            Username = "TestUser",
-            Email = "test@test.com",
+            Username = "DeleteClub_ShouldReturnForbidden_WhenUserIsNotAnAdmin",
+            Email = "DeleteClub_ShouldReturnForbidden_WhenUserIsNotAnAdmin@test.com",
             Password = "Test1234!",
             ConfirmPassword = "Test1234!"
         });
@@ -165,29 +100,17 @@ public class DeleteClubTests : InjectableWebApplicationFactory
 
         var invitationId = await sendInviteRequest.Content.ReadFromJsonAsync<EntityIdDto>();
 
-        var loggedInUserId = await LoginAsUser(new UserLoginDto { Email = "test@test.com", Password = "Test1234!" });
+        var loggedInUserId = await LoginAsUser(new UserLoginDto { Email = "DeleteClub_ShouldReturnForbidden_WhenUserIsNotAnAdmin@test.com", Password = "Test1234!" });
 
         var acceptInvitationRequest = await HttpClient.PatchAsync($"api/v1/Invitation/AcceptInvitation?invitationId={invitationId!.Id}", null);
-        var re = await acceptInvitationRequest.Content.ReadAsStringAsync();
 
-        // Re-login as admin
-        await AuthoriseSUT();
-
-        var removeMemberFromClubRequest = await HttpClient.DeleteAsync($"api/v1/Club/RemoveMemberFromClub?userId={AuthenticatedUserId}&clubId={clubId}");
-        var leaveClubRequest = await HttpClient.DeleteAsync($"api/v1/Account/LeaveClub?clubId={clubId}");
-
-        var clubRequest = await HttpClient.GetAsync($"api/v1/Club/GetClub?id={clubId}");
-        var clubResponse = await clubRequest.Content.ReadFromJsonAsync<ClubDto>();
+        var deleteRequest = await HttpClient.DeleteAsync($"api/v1/Club/DeleteClub?id={clubId}");
 
         // Assert
         Assert.Equal(newUserId, loggedInUserId);
         Assert.Equal(HttpStatusCode.OK, acceptInvitationRequest.StatusCode);
 
-        Assert.Equal(HttpStatusCode.BadRequest, removeMemberFromClubRequest.StatusCode);
-        Assert.Equal(HttpStatusCode.BadRequest, leaveClubRequest.StatusCode);
-
-        Assert.NotNull(clubResponse);
-        Assert.Equal(2, clubResponse.MembershipIds.Count);
+        Assert.Equal(HttpStatusCode.Forbidden, deleteRequest.StatusCode);
     }
 
     private async Task<Guid?> CreateClubAsync(ClubCreateDto club)

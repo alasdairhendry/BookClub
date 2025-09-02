@@ -232,6 +232,14 @@ public class ClubService : IClubService
                     return ResultState.Failed(ResultErrorType.Validation, "User already has a member role");
             }
 
+            if (membership.IsAdmin)
+            {
+                var adminCount = await work.ClubMembershipRepository.GetCount(x=>x.ClubId == clubId && x.IsAdmin);
+                
+                if(adminCount == 1)
+                    return ResultState.Failed(ResultErrorType.Validation, "Cannot remove the only admin from Club");
+            }
+            
             membership.IsAdmin = isAdmin;
 
             work.ClubMembershipRepository.Update(membership);
