@@ -55,7 +55,7 @@ public class InjectableWebApplicationFactory : WebApplicationFactory<Program>, I
     private async Task Register()
     {
         // Arrange
-        var content = new UserRegistrationModel
+        var content = new UserRegistrationDto
         {
             Username = "Admin",
             Email = "admin@gmail.com",
@@ -74,7 +74,7 @@ public class InjectableWebApplicationFactory : WebApplicationFactory<Program>, I
     private async Task Login()
     {
         // Arrange
-        var content = new UserLoginModel()
+        var content = new UserLoginDto()
         {
             Email = "admin@gmail.com",
             Password = "Test1234!",

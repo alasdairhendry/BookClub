@@ -24,33 +24,33 @@ public class UserService : IUserService
         _signInManager = signInManager;
     }
 
-    public async Task<ResultState> Register(UserRegistrationModel model)
+    public async Task<ResultStateId> Register(UserRegistrationDto model)
     {
         try
         {
             if (Regex.IsMatch(model.Email, "\\w+([-+.']\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*") == false)
-                return ResultState.Failed(ResultErrorType.Validation,"Email is invalid");
+                return ResultStateId.Failed(ResultErrorType.Validation,"Email is invalid");
 
             if (model.Password != model.ConfirmPassword)
-                return ResultState.Failed(ResultErrorType.Validation,"Passwords do not match");
+                return ResultStateId.Failed(ResultErrorType.Validation,"Passwords do not match");
 
             var user = new ApplicationUserDbo { UserName = model.Username, Email = model.Email, DateCreated = DateTime.UtcNow, LastLogin = DateTime.UtcNow };
             var result = await _signInManager.UserManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
-                return ResultState.Success();
+                return ResultStateId.Success(user.Id);
 
             if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.DuplicateUserName)))
-                return ResultState.Failed(ResultErrorType.Validation,"Username already exists");
+                return ResultStateId.Failed(ResultErrorType.Validation,"Username already exists");
 
             if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.InvalidUserName)))
-                return ResultState.Failed(ResultErrorType.Validation,"Username is invalid");
+                return ResultStateId.Failed(ResultErrorType.Validation,"Username is invalid");
 
             if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.DuplicateEmail)))
-                return ResultState.Failed(ResultErrorType.Validation,"Email address already exists");
+                return ResultStateId.Failed(ResultErrorType.Validation,"Email address already exists");
 
             if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.InvalidEmail)))
-                return ResultState.Failed(ResultErrorType.Validation,"Email address is not valid");
+                return ResultStateId.Failed(ResultErrorType.Validation,"Email address is not valid");
 
             // TODO - Define password rules
             if (result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.PasswordRequiresDigit)) ||
@@ -59,7 +59,7 @@ public class UserService : IUserService
                 result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.PasswordTooShort)) ||
                 result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.PasswordRequiresNonAlphanumeric)) ||
                 result.Errors.Any(x => x.Code == nameof(IdentityErrorDescriber.PasswordRequiresUniqueChars)))
-                return ResultState.Failed(ResultErrorType.Validation,"Password must contain [xxx]");
+                return ResultStateId.Failed(ResultErrorType.Validation,"Password must contain [xxx]");
 
             throw new Exception(JsonConvert.SerializeObject(result.Errors.ToList()));
         }
@@ -70,7 +70,7 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<ResultState> RegisterWithSpecificId(UserRegistrationModel model, Guid userId)
+    public async Task<ResultState> RegisterWithSpecificId(UserRegistrationDto model, Guid userId)
     {
         try
         {
@@ -108,7 +108,7 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<ResultStateId> Login(UserLoginModel model)
+    public async Task<ResultStateId> Login(UserLoginDto model)
     {
         try
         {
@@ -148,7 +148,7 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<ResultState<UserTokenModel>> GetToken(UserLoginModel model)
+    public async Task<ResultState<UserTokenDto>> GetToken(UserLoginDto model)
     {
         try
         {
@@ -156,13 +156,13 @@ public class UserService : IUserService
             var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, true, false);
 
             if (result.Succeeded)
-                return ResultState<UserTokenModel>.Success(null!);
+                return ResultState<UserTokenDto>.Success(null!);
 
             if (result.IsLockedOut)
-                return ResultState<UserTokenModel>.Failed(null!, ResultErrorType.Validation, "Account is temporarily locked");
+                return ResultState<UserTokenDto>.Failed(null!, ResultErrorType.Validation, "Account is temporarily locked");
 
             if (result.IsNotAllowed)
-                return ResultState<UserTokenModel>.Failed(null!, ResultErrorType.Validation, "Email has not been confirmed yet");
+                return ResultState<UserTokenDto>.Failed(null!, ResultErrorType.Validation, "Email has not been confirmed yet");
 
             throw new Exception(JsonConvert.SerializeObject(result));
         }

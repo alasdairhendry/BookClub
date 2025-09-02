@@ -17,14 +17,42 @@ public class HttpContextService : IHttpContextService
         _signInManager = signInManager;
         _contextAccessor = contextAccessor;
     }
-    
+
+    public async Task<ResultState<ApplicationUserDbo?>> GetContextApplicationUserAsync()
+    {
+        try
+        {
+            var claimsPrincipal = _contextAccessor.HttpContext?.User;
+
+            if(claimsPrincipal == null)
+                return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.Exception, "Context not found");
+            
+            // TODO - Unsure if we want to verify authentication at this point?
+            // if (claimsPrincipal?.Identity is null)
+                // return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.Unauthorised, "User not authenticated");
+
+            // if (claimsPrincipal.Identity?.IsAuthenticated == false)
+                // return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.Unauthorised, "User not authenticated");
+
+            var applicationUser = await _signInManager.UserManager.GetUserAsync(claimsPrincipal);
+
+            if (applicationUser == null)
+                return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.NotFound, "User does not exist");
+            
+            return ResultState<ApplicationUserDbo?>.Success(applicationUser);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.Exception, "An error has occurred");
+        }
+    }
+
     /// <summary>
     /// Is the context user active, authenticated, not blocked etc.
     /// Essentially, free to make actions on the app (create clubs, comments, etc.)
     /// </summary>
-    /// <param name="userId"></param>
-    /// <returns></returns>
-    public async Task<ResultState<ApplicationUserDbo?>> ContextUserIsActiveAsync()
+    public async Task<ResultState<ApplicationUserDbo?>> ContextApplicationUserIsEnabledAsync()
     {
         try
         {
@@ -36,9 +64,9 @@ public class HttpContextService : IHttpContextService
             if (claimsPrincipal.Identity?.IsAuthenticated == false)
                 return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.Unauthorised, "User not authenticated");
 
-            var identityUser = await _signInManager.UserManager.GetUserAsync(claimsPrincipal);
+            var applicationUser = await _signInManager.UserManager.GetUserAsync(claimsPrincipal);
 
-            if (identityUser == null)
+            if (applicationUser == null)
                 return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.Unauthorised, "User not authenticated");
 
             // TODO - Uncomment once testing concluded
@@ -48,7 +76,7 @@ public class HttpContextService : IHttpContextService
             // if (identityUser.LockoutEnd >= DateTime.UtcNow)
             //     return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.Validation, "Account is temporarily locked");
             
-            return ResultState<ApplicationUserDbo?>.Success(identityUser);
+            return ResultState<ApplicationUserDbo?>.Success(applicationUser);
         }
         catch (Exception e)
         {

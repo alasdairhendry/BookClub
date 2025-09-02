@@ -32,7 +32,7 @@ public class ApiResponseFactory
             case ResultErrorType.NotFound:
                 return new NotFoundObjectResult(new ApiErrorResponse(result.PublicMessage));
             case ResultErrorType.Unauthorised:
-                return new UnauthorizedObjectResult(new ApiErrorResponse(result.PublicMessage));
+                return new ForbiddenObjectResult(new ApiErrorResponse(result.PublicMessage));
             default:
                 return InternalServerError();
         }

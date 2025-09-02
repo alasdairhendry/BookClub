@@ -1,8 +1,8 @@
 using System.ComponentModel;
 
-namespace IntegrationTests.Models.DTO.Actions;
+namespace Domain.Models.DTO.Actions;
 
-public class UserLoginModel
+public class UserLoginDto
 {
     [DefaultValue("test@gmail.com")]
     public required string Email { get; set; }

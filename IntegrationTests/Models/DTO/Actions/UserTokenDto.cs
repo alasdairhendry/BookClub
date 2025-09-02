@@ -1,6 +1,6 @@
-namespace Domain.Models.DTO.Actions;
+namespace IntegrationTests.Models.DTO.Actions;
 
-public class UserTokenModel
+public class UserTokenDto
 {
     public string Token { get; set; } = null!;
     public DateTime Expires { get; set; } = default!;

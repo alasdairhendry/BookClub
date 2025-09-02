@@ -8,8 +8,8 @@ namespace Domain.Interfaces;
 
 public interface IUserService
 {
-    Task<ResultState> Register(UserRegistrationModel model);
-    Task<ResultStateId> Login(UserLoginModel model);
-    Task<ResultState<UserTokenModel>> GetToken(UserLoginModel model);
-    Task<ResultState> RegisterWithSpecificId(UserRegistrationModel model, Guid userId);
+    Task<ResultStateId> Register(UserRegistrationDto model);
+    Task<ResultStateId> Login(UserLoginDto model);
+    Task<ResultState<UserTokenDto>> GetToken(UserLoginDto model);
+    Task<ResultState> RegisterWithSpecificId(UserRegistrationDto model, Guid userId);
 }

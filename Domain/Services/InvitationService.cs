@@ -30,13 +30,15 @@ public class InvitationService : IInvitationService
     {
         try
         {
-            var user = await _httpContextService.ContextUserIsActiveAsync();
+            var user = await _httpContextService.ContextApplicationUserIsEnabledAsync();
 
             if (user.Succeeded == false || user.Data is null)
                 return ResultStateId.Failed(user.ErrorType, user.PublicMessage);
 
-            if ((await _permissionService.ContextUserIsAdminOfAsync(model.ClubId)).Succeeded == false)
-                return ResultStateId.Failed(ResultErrorType.Unauthorised, "User does not have admin access to this resource");
+            var adminCheck = await _permissionService.ContextUserIsAdminOfClubAsync(model.ClubId);
+            
+            if (adminCheck.Succeeded == false)
+                return ResultStateId.Failed(adminCheck.ErrorType, adminCheck.PublicMessage);
 
             using var work = new UnitOfWork(_dbContext);
 
@@ -46,7 +48,7 @@ public class InvitationService : IInvitationService
 
             // Check user isn't already in club
             if ((await _accountService.IsMemberOfClubAsync(model.ApplicationUserId, model.ClubId)).Succeeded)
-                return ResultStateId.Failed(ResultErrorType.Validation, "User is already a member of this club");
+                return ResultStateId.Failed(ResultErrorType.Validation, "User is already a member of this Club");
 
             // Check user doesn't already have an open invitation
             if (await work.InvitationRepository.FilterAsSingleAsync(
@@ -79,7 +81,7 @@ public class InvitationService : IInvitationService
     {
         try
         {
-            var user = await _httpContextService.ContextUserIsActiveAsync();
+            var user = await _httpContextService.ContextApplicationUserIsEnabledAsync();
 
             if (user.Succeeded == false || user.Data is null)
                 return ResultState.Failed(user.ErrorType, user.PublicMessage);
@@ -96,7 +98,7 @@ public class InvitationService : IInvitationService
 
             // Check user isn't already in club
             if ((await _accountService.IsMemberOfClubAsync(invitation.TargetUserId, invitation.TargetClubId)).Succeeded)
-                return ResultState.Failed(ResultErrorType.Validation, "User is already a member of this club");
+                return ResultState.Failed(ResultErrorType.Validation, "User is already a member of this Club");
 
             invitation.DateResponded = DateTime.UtcNow;
             invitation.Response = true;
@@ -129,7 +131,7 @@ public class InvitationService : IInvitationService
     {
         try
         {
-            var user = await _httpContextService.ContextUserIsActiveAsync();
+            var user = await _httpContextService.ContextApplicationUserIsEnabledAsync();
 
             if (user.Succeeded == false || user.Data is null)
                 return ResultState.Failed(user.ErrorType, user.PublicMessage);

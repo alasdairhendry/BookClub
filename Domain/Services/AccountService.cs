@@ -68,13 +68,13 @@ public class AccountService : IAccountService
         {
             using var work = new UnitOfWork(_dbContext);
 
-            var user = await work.ApplicationUserRepository.FilterAsSingleAsync(x=>x.Id == userId, "ClubMemberships");
+            var user = await work.ApplicationUserRepository.FilterAsSingleAsync(x => x.Id == userId, "ClubMemberships");
 
             if (user is null)
                 return ResultState<List<ClubDto>>.Failed([], ResultErrorType.NotFound, "User does not exist");
 
             var memberships = new List<ClubDto>();
-            
+
             // Todo - batch this
             foreach (var membership in user.ClubMemberships)
             {
@@ -82,8 +82,8 @@ public class AccountService : IAccountService
                     continue;
 
                 var club = await work.ClubRepository.GetByIDAsync(membership.ClubId);
-                
-                if(club is null)
+
+                if (club is null)
                     continue;
 
                 memberships.Add(ClubDto.FromDatabaseObject(club));
@@ -97,14 +97,14 @@ public class AccountService : IAccountService
             throw;
         }
     }
-    
+
     public async Task<ResultState<List<InvitationDto>>> GetUserClubInvitationsAsync(Guid? userId, bool activeOnly = false)
     {
         try
         {
             using var work = new UnitOfWork(_dbContext);
 
-            var user = await work.ApplicationUserRepository.FilterAsSingleAsync(x=>x.Id == userId, "Invitations.TargetClub,Invitations.FromUser");
+            var user = await work.ApplicationUserRepository.FilterAsSingleAsync(x => x.Id == userId, "Invitations.TargetClub,Invitations.FromUser");
 
             if (user is null)
                 return ResultState<List<InvitationDto>>.Failed([], ResultErrorType.NotFound, "User does not exist");
@@ -112,16 +112,16 @@ public class AccountService : IAccountService
             var response = new List<InvitationDto>();
 
             var invitations = user.Invitations;
-            
-            if(activeOnly)
-                invitations = user.Invitations.Where(x=>x.DateResponded == null).ToList();
-            
+
+            if (activeOnly)
+                invitations = user.Invitations.Where(x => x.DateResponded == null).ToList();
+
             // Todo - batch this
             foreach (var invitation in invitations)
             {
                 if (invitation is null)
                     continue;
-                
+
                 response.Add(InvitationDto.FromDatabaseObject(invitation));
             }
 
@@ -138,18 +138,31 @@ public class AccountService : IAccountService
     {
         try
         {
-            var userResult = await _httpContextService.ContextUserIsActiveAsync();
+            var userResult = await _httpContextService.ContextApplicationUserIsEnabledAsync();
 
             if (userResult.Succeeded == false || userResult.Data is null)
-                return ResultState.Failed(ResultErrorType.Unauthorised, userResult.PublicMessage);
+                return ResultState.Failed(userResult.ErrorType, userResult.PublicMessage);
 
             using var work = new UnitOfWork(_dbContext);
 
-            var membership = await work.ClubMembershipRepository.FilterAsSingleAsync(x=>x.ClubId == clubId && x.UserId == userResult.Data.Id);
+            var membership = await work.ClubMembershipRepository.FilterAsSingleAsync(x => x.ClubId == clubId && x.UserId == userResult.Data.Id);
 
             if (membership is null)
-                return ResultState.Failed(ResultErrorType.Conflict, "User is not a member of this club");
+                return ResultState.Failed(ResultErrorType.Conflict, "User is not a member of this Club");
 
+            if (membership.IsAdmin)
+            {
+                var adminCount = await work.ClubMembershipRepository.GetCount(x => x.ClubId == clubId && x.IsAdmin);
+
+                if (adminCount == 1)
+                    return ResultState.Failed(ResultErrorType.Validation, "Cannot leave Club when you are the only admin");
+            }
+
+            var memberCount = await work.ClubMembershipRepository.GetCount(x => x.ClubId == clubId);
+
+            if (memberCount == 1)
+                return ResultState.Failed(ResultErrorType.Validation, "Cannot leave Club when you are the only member");
+            
             work.ClubMembershipRepository.Delete(membership);
             await work.SaveAsync();
 
@@ -161,19 +174,19 @@ public class AccountService : IAccountService
             throw;
         }
     }
-    
+
     public async Task<ResultState> IsMemberOfClubAsync(Guid? userId, Guid clubId)
     {
         try
         {
             await using var scope = _serviceProvider.CreateAsyncScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            
+
             using var work = new UnitOfWork(dbContext);
-            
+
             if (await work.ClubMembershipRepository.FilterAsSingleAsync(x => x.ClubId == clubId && x.UserId == userId) is not null)
                 return ResultState.Success();
-            
+
             return ResultState.Failed();
         }
         catch (Exception e)

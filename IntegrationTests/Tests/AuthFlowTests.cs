@@ -30,7 +30,7 @@ public class AuthFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
     public async Task Get_UserAuthFlowIsSuccessful_Stage_01_Register()
     {
         // Arrange
-        var content = new IntegrationTests.Models.DTO.Actions.UserRegistrationModel
+        var content = new IntegrationTests.Models.DTO.Actions.UserRegistrationDto
         {
             Username = "BobDylan",
             Email = "bobdylan@gmail.com",
@@ -51,7 +51,7 @@ public class AuthFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
     public async Task Get_UserAuthFlowIsSuccessful_Stage_02_Login()
     {
         // Arrange
-        var content = new IntegrationTests.Models.DTO.Actions.UserLoginModel()
+        var content = new IntegrationTests.Models.DTO.Actions.UserLoginDto()
         {
             Email = "bobdylan@gmail.com",
             Password = "Test1234!",

@@ -27,14 +27,14 @@ public class AuthController : ControllerBase
     }
     
     [HttpPost("Register")]
-    public async Task<IActionResult> Register(UserRegistrationModel model)
+    public async Task<IActionResult> Register(UserRegistrationDto model)
     {
         try
         {
             var result = await _userService.Register(model);
 
             if (result.Succeeded)
-                return Created();
+                return Created(result.Data!.Id.ToString(), result.Data);
 
             return _apiResponseFactory.FromResult(result);
         }
@@ -46,7 +46,7 @@ public class AuthController : ControllerBase
     }
     
     [HttpPost("Login")]
-    public async Task<IActionResult> Login(UserLoginModel model)
+    public async Task<IActionResult> Login(UserLoginDto model)
     {
         try
         {
@@ -65,7 +65,7 @@ public class AuthController : ControllerBase
     }
     
     [HttpPost("GetToken")]
-    public async Task<IActionResult> GetToken(UserLoginModel model)
+    public async Task<IActionResult> GetToken(UserLoginDto model)
     {
         try
         {

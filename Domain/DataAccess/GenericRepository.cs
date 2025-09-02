@@ -39,6 +39,18 @@ public class GenericRepository<TEntity> where TEntity : class
         }
     }
 
+    public virtual async Task<int> GetCount(Expression<Func<TEntity, bool>>? filter = null)
+    {
+        IQueryable<TEntity> query = dbSet;
+
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+
+        return await query.CountAsync();
+    }
+
     public virtual async Task<TEntity?> FilterAsSingleAsync(Expression<Func<TEntity, bool>>? filter = null, string includeProperties = "")
     {
         IQueryable<TEntity> query = dbSet;
@@ -81,7 +93,7 @@ public class GenericRepository<TEntity> where TEntity : class
         if (entityToDelete != null)
             Delete(entityToDelete);
     }
-    
+
     public virtual void Delete(TEntity entityToDelete)
     {
         if (context.Entry(entityToDelete).State == EntityState.Detached)

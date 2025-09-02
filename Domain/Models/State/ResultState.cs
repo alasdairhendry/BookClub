@@ -14,6 +14,11 @@ public class ResultState<T>
         return new ResultState<T> { Succeeded = true, Data = data, ErrorType = ResultErrorType.None };
     }
 
+    public static ResultState<T> Failed(ResultErrorType errorType , string? publicMessage)
+    {
+        return new ResultState<T> { Succeeded = false, Data = default(T)!, ErrorType = errorType, PublicMessage = publicMessage };
+    }
+    
     public static ResultState<T> Failed(T data, ResultErrorType errorType , string? publicMessage)
     {
         return new ResultState<T> { Succeeded = false, Data = data, ErrorType = errorType, PublicMessage = publicMessage };

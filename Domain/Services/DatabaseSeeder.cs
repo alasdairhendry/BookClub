@@ -31,8 +31,8 @@ public class DatabaseSeeder : IDatabaseSeeder
 
             var davidId = Guid.Parse("1234f747-48c6-4e89-b3b2-35c8d3701234");
             var johnId = Guid.Parse("abcd6616-1729-4178-9d35-12b093acabcd");
-            await _userService.RegisterWithSpecificId(new UserRegistrationModel { Username = "David", Email = "david@gmail.com", Password = "Test1234!", ConfirmPassword = "Test1234!" }, davidId);
-            await _userService.RegisterWithSpecificId(new UserRegistrationModel { Username = "John", Email = "john@gmail.com", Password = "Test1234!", ConfirmPassword = "Test1234!" }, johnId);
+            await _userService.RegisterWithSpecificId(new UserRegistrationDto { Username = "David", Email = "david@gmail.com", Password = "Test1234!", ConfirmPassword = "Test1234!" }, davidId);
+            await _userService.RegisterWithSpecificId(new UserRegistrationDto { Username = "John", Email = "john@gmail.com", Password = "Test1234!", ConfirmPassword = "Test1234!" }, johnId);
 
             // await _userService.Login(new UserLoginModel { Email = "david@gmail.com", Password = "Test1234!" });
 
