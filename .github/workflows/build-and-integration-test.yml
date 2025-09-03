@@ -6,6 +6,8 @@ on:
     paths:
     - '**.cs'
     - '**.csproj'
+  pull_request:
+    branches: [ main ]
 
 env:
   DOTNET_VERSION: '8.0'
