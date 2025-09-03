@@ -11,8 +11,8 @@ env:
   DOTNET_VERSION: '8.0'
 
 jobs:
-  build-and-integration-test
-
+  build-and-integration-test:
+  
     name: build-and-integration-test-${{matrix.os}}
     runs-on: ${{ matrix.os }}
     strategy:
