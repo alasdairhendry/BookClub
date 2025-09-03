@@ -25,26 +25,26 @@ public class HttpContextService : IHttpContextService
             var claimsPrincipal = _contextAccessor.HttpContext?.User;
 
             if(claimsPrincipal == null)
-                return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.Exception, "Context not found");
+                return ResultState<ApplicationUserDbo?>.Failed(ResultErrorType.Exception, "Context not found");
             
             // TODO - Unsure if we want to verify authentication at this point?
             // if (claimsPrincipal?.Identity is null)
-                // return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.Unauthorised, "User not authenticated");
+                // return ResultState<ApplicationUserDbo?>.Failed(ResultErrorType.Unauthorised, "User not authenticated");
 
             // if (claimsPrincipal.Identity?.IsAuthenticated == false)
-                // return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.Unauthorised, "User not authenticated");
+                // return ResultState<ApplicationUserDbo?>.Failed(ResultErrorType.Unauthorised, "User not authenticated");
 
             var applicationUser = await _signInManager.UserManager.GetUserAsync(claimsPrincipal);
 
             if (applicationUser == null)
-                return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.NotFound, "User does not exist");
+                return ResultState<ApplicationUserDbo?>.Failed(ResultErrorType.NotFound, "User does not exist");
             
             return ResultState<ApplicationUserDbo?>.Success(applicationUser);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.Exception, "An error has occurred");
+            return ResultState<ApplicationUserDbo?>.Failed(ResultErrorType.Exception, "An error has occurred");
         }
     }
 
@@ -59,29 +59,29 @@ public class HttpContextService : IHttpContextService
             var claimsPrincipal = _contextAccessor.HttpContext?.User;
 
             if (claimsPrincipal?.Identity is null)
-                return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.Unauthorised, "User not authenticated");
+                return ResultState<ApplicationUserDbo?>.Failed(ResultErrorType.Unauthorised, "User not authenticated");
 
             if (claimsPrincipal.Identity?.IsAuthenticated == false)
-                return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.Unauthorised, "User not authenticated");
+                return ResultState<ApplicationUserDbo?>.Failed(ResultErrorType.Unauthorised, "User not authenticated");
 
             var applicationUser = await _signInManager.UserManager.GetUserAsync(claimsPrincipal);
 
             if (applicationUser == null)
-                return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.Unauthorised, "User not authenticated");
+                return ResultState<ApplicationUserDbo?>.Failed(ResultErrorType.Unauthorised, "User not authenticated");
 
             // TODO - Uncomment once testing concluded
             // if (identityUser.EmailConfirmed == false)
-            //     return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.Validation, "Email has not been confirmed yet");
+            //     return ResultState<ApplicationUserDbo?>.Failed(ResultErrorType.Validation, "Email has not been confirmed yet");
             //
             // if (identityUser.LockoutEnd >= DateTime.UtcNow)
-            //     return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.Validation, "Account is temporarily locked");
+            //     return ResultState<ApplicationUserDbo?>.Failed(ResultErrorType.Validation, "Account is temporarily locked");
             
             return ResultState<ApplicationUserDbo?>.Success(applicationUser);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return ResultState<ApplicationUserDbo?>.Failed(null, ResultErrorType.Exception, "An error has occurred");
+            return ResultState<ApplicationUserDbo?>.Failed(ResultErrorType.Exception, "An error has occurred");
         }
     }
 }

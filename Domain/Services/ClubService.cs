@@ -30,7 +30,7 @@ public class ClubService : IClubService
             var user = await _httpContextService.ContextApplicationUserIsEnabledAsync();
 
             if (user.Succeeded == false || user.Data is null)
-                return ResultState<ClubDto?>.Failed(null, user.ErrorType, user.PublicMessage);
+                return ResultState<ClubDto?>.Failed(user.ErrorType, user.PublicMessage);
 
             var viewCheck = await _permissionService.ContextUserHasViewOfClubAsync(id);
             
@@ -38,13 +38,13 @@ public class ClubService : IClubService
                 return ResultState<ClubDto?>.Failed(viewCheck.ErrorType, viewCheck.PublicMessage);
             
             if ((await _permissionService.ContextUserHasViewOfClubAsync(id)).Succeeded == false)
-                return ResultState<ClubDto?>.Failed(null, ResultErrorType.Unauthorised, "User does not have access to this Club");
+                return ResultState<ClubDto?>.Failed(ResultErrorType.Unauthorised, "User does not have access to this Club");
 
             using var work = new UnitOfWork(_dbContext);
             var result = await work.ClubRepository.FilterAsSingleAsync(x => x.Id == id, includeProperties: "ClubMemberships");
 
             if (result is null)
-                return ResultState<ClubDto?>.Failed(null, ResultErrorType.NotFound, "Club not found");
+                return ResultState<ClubDto?>.Failed(ResultErrorType.NotFound, "Club not found");
 
             ClubDto club = ClubDto.FromDatabaseObject(result);
 

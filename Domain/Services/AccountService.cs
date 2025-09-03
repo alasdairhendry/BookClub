@@ -30,7 +30,7 @@ public class AccountService : IAccountService
             var user = await work.ApplicationUserRepository.GetByIDAsync(userId);
 
             if (user is null)
-                return ResultState<UserDto?>.Failed(null, ResultErrorType.NotFound, "User does not exist");
+                return ResultState<UserDto?>.Failed(ResultErrorType.NotFound, "User does not exist");
 
             var dto = new UserDto()
             {
