@@ -57,7 +57,7 @@ public class AccountController : ControllerBase
         }
     }
     
-    [HttpGet("GetUserClubInvitations")]
+    [HttpGet("GetUserClubInvitations")] 
     public async Task<IActionResult> GetUserClubInvitations(Guid id, bool activeOnly = false)
     {
         try
