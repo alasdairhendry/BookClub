@@ -63,8 +63,8 @@ src/BookClub.Application -> Business logic (use cases, services, DTOs)\
 src/BookClub.Domain -> Entities, enums, value objects, business rules\
 src/BookClub.Infrastructure -> EF Core, repositories, caching, external APIs\
 
-tests/BookClub.UnitTests\
-tests/BookClub.IntegrationTests\
+src/BookClub.UnitTests\
+src/BookClub.IntegrationTests\
 
 **Domain** → Pure business logic, framework-agnostic\
 **Application** → Use cases, DTOs, service interfaces\
@@ -79,6 +79,8 @@ tests/BookClub.IntegrationTests\
 - On login:
   - **Access Token (JWT)** — 15 min expiry
   - **Refresh Token** — 7 day expiry, stored in DB
+    - or
+  - **Identity Cookie**
 - API endpoints require `Authorization: Bearer <token>`
 - Refresh token endpoint issues new access/refresh tokens
 
@@ -87,22 +89,25 @@ tests/BookClub.IntegrationTests\
 ## Getting Started
 
 ### Prerequisites
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [Docker](https://www.docker.com/)
+
+  &nbsp;&nbsp;&nbsp;&nbsp;or
+
+- [ASP.NET Core Runtime 8](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [PostgreSQL](https://www.postgresql.org/) (local or via Docker)
 
 ### Run Locally
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/book-club-platform.git
-cd book-club-platform
+git clone https://github.com/alasdairhendry/BookClub.git
+cd BookClub
 
 # Run via Docker Compose
-docker-compose up --build
+docker compose up --build
 ```
 
-API will be available at: http://localhost:5000 \
-Swagger UI:               http://localhost:5000/swagger
+API will be available at: http://localhost:50001 \
+Swagger UI:               http://localhost:50001/swagger
 
 ## Roadmap
 ### MVP

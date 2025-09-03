@@ -23,7 +23,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> IntegrationTest()
     {
         await Task.Delay(1);
-        return Ok();
+        return Ok("Hello world");
     }
     
     [HttpPost("Register")]

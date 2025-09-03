@@ -6,8 +6,11 @@ using Domain.Services;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Console.WriteLine($"Args: {JsonConvert.SerializeObject(args, Formatting.Indented)}");
 
 // Add services to the container.
 builder.Services.AddSingleton<ApiResponseFactory>();
@@ -70,10 +73,12 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+Console.WriteLine($"Environment: {app.Environment.EnvironmentName}");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    
     // app.MapOpenApi();
     var basePath = "/api/v1/";
     app.UseSwagger(options =>
@@ -101,8 +106,6 @@ if (app.Environment.IsDevelopment())
     await seeder.SeedClubInvitations();
 }
 
-// Adds authentication endpoints 
-// app.MapGroup("/api/v1/").MapIdentityApi<IdentityUser>();
 app.MapSwagger().RequireAuthorization();
 
 app.UseHttpsRedirection();
@@ -116,5 +119,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+Console.WriteLine();
 
 public partial class Program { }
