@@ -1,7 +1,7 @@
 using Data;
-using Data.Models.Dbo;
-using Domain.Interfaces;
-using Domain.Services;
+using Domain.Models.Dbo;
+using Application.Interfaces;
+using Application.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationTests.Factories;

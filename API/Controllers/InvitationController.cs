@@ -1,7 +1,7 @@
 using API.Services;
-using Domain.Interfaces;
-using Domain.Models.DTO.Actions;
-using Domain.Services;
+using Application.Interfaces;
+using Application.Models.Dto.Actions;
+using Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

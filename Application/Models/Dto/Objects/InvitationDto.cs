@@ -1,6 +1,6 @@
 using Domain.Models.Dbo;
 
-namespace IntegrationTests.Models.DTO.Objects;
+namespace Application.Models.Dto.Objects;
 
 public class InvitationDto
 {

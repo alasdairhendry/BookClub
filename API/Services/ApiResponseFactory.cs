@@ -1,7 +1,7 @@
 using API.Models;
 using Domain.Enums;
-using Domain.Models.DTO.Objects;
-using Domain.Models.State;
+using Application.Models.Dto.Objects;
+using Application.Models.State;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Services;

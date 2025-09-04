@@ -1,0 +1,18 @@
+using Domain.Models.Dbo;
+using Application.Models.State;
+
+namespace Application.Interfaces;
+
+public interface IHttpContextService
+{
+    /// <summary>
+    /// Obtains the IdentityUser from the HttpContext
+    /// </summary>
+    Task<ResultState<ApplicationUserDbo?>> GetContextApplicationUserAsync();
+    
+    /// <summary>
+    /// Is the context user active, authenticated, not blocked etc.
+    /// Essentially, free to make actions on the app (create clubs, comments, etc.)
+    /// </summary>
+    Task<ResultState<ApplicationUserDbo?>> ContextApplicationUserIsEnabledAsync();
+}

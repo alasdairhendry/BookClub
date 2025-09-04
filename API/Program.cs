@@ -1,8 +1,9 @@
 using API.Services;
 using Data;
-using Data.Models.Dbo;
-using Domain.Interfaces;
-using Domain.Services;
+using Domain.Models.Dbo;
+using Application.Interfaces;
+using Application.Services;
+using Data.Repositories;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -22,6 +23,16 @@ builder.Services.AddScoped<IHttpContextService, HttpContextService>();
 builder.Services.AddScoped<IInvitationService, InvitationService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IDataRepository<ApplicationUserDbo>, DataRepository<ApplicationUserDbo>>();
+builder.Services.AddScoped<IDataRepository<ClubActivityDbo>, DataRepository<ClubActivityDbo>>();
+builder.Services.AddScoped<IDataRepository<ClubActivitySectionDbo>, DataRepository<ClubActivitySectionDbo>>();
+builder.Services.AddScoped<IDataRepository<ClubDbo>, DataRepository<ClubDbo>>();
+builder.Services.AddScoped<IDataRepository<ClubMembershipDbo>, DataRepository<ClubMembershipDbo>>();
+builder.Services.AddScoped<IDataRepository<CommentDbo>, DataRepository<CommentDbo>>();
+builder.Services.AddScoped<IDataRepository<InvitationDbo>, DataRepository<InvitationDbo>>();
+builder.Services.AddScoped<IDataRepository<RecordDbo>, DataRepository<RecordDbo>>();
 
 builder.Services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
 

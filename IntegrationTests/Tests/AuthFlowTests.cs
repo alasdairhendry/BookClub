@@ -1,4 +1,4 @@
-using Domain.Interfaces;
+using Application.Interfaces;
 using IntegrationTests.Factories;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Testing;

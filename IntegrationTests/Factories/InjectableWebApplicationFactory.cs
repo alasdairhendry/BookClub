@@ -1,6 +1,6 @@
 using System.Data.Common;
 using Data;
-using Domain.Models.DTO.Objects;
+using Application.Models.Dto.Objects;
 using IntegrationTests.Models.DTO.Actions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
