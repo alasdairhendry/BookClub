@@ -1,4 +1,4 @@
-using Data.Models.Dbo;
+using Domain.Models.Dbo;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

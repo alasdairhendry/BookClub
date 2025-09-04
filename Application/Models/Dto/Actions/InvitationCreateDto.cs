@@ -1,6 +1,4 @@
-using Domain.Models.Dbo;
-
-namespace IntegrationTests.Models.DTO.Actions;
+namespace Application.Models.Dto.Actions;
 
 public class InvitationCreateDto
 {

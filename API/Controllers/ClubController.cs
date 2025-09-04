@@ -1,7 +1,6 @@
 using API.Services;
-using Domain.Interfaces;
-using Domain.Models.DTO;
-using Domain.Models.DTO.Actions;
+using Application.Interfaces;
+using Application.Models.Dto.Actions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -39,7 +38,7 @@ public class ClubController : ControllerBase
             return _apiResponseFactory.InternalServerError();
         }
     }
-    
+
     [HttpGet("GetClubs")]
     public async Task<IActionResult> GetClubs()
     {
@@ -58,7 +57,7 @@ public class ClubController : ControllerBase
             return _apiResponseFactory.InternalServerError();
         }
     }
-    
+
     [HttpGet("GetClubMemberships")]
     public async Task<IActionResult> GetClubMemberships(Guid id)
     {
@@ -77,7 +76,7 @@ public class ClubController : ControllerBase
             return _apiResponseFactory.InternalServerError();
         }
     }
-    
+
     [HttpPost("CreateClub")]
     public async Task<IActionResult> CreateClub(ClubCreateDto model)
     {
@@ -96,7 +95,7 @@ public class ClubController : ControllerBase
             return _apiResponseFactory.InternalServerError();
         }
     }
-    
+
     [HttpPatch("UpdateClub")]
     public async Task<IActionResult> UpdateClub(ClubUpdateDto model)
     {
@@ -134,7 +133,7 @@ public class ClubController : ControllerBase
             return _apiResponseFactory.InternalServerError();
         }
     }
-    
+
     [HttpDelete("RemoveMemberFromClub")]
     public async Task<IActionResult> RemoveMemberFromClub(Guid userId, Guid clubId)
     {
@@ -153,7 +152,7 @@ public class ClubController : ControllerBase
             return _apiResponseFactory.InternalServerError();
         }
     }
-    
+
     [HttpDelete("DeleteClub")]
     public async Task<IActionResult> DeleteClub(Guid id)
     {
