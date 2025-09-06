@@ -23,6 +23,8 @@ builder.Services.AddScoped<IHttpContextService, HttpContextService>();
 builder.Services.AddScoped<IInvitationService, InvitationService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRecordService, RecordService>();
+builder.Services.AddScoped<IOpenApiService, OpenApiService>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IDataRepository<ApplicationUserDbo>, DataRepository<ApplicationUserDbo>>();
