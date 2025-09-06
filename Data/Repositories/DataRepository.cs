@@ -40,19 +40,21 @@ public class DataRepository<TEntity> : IDataRepository<TEntity> where TEntity : 
         return await query.CountAsync();
     }
 
-    public async Task<IEnumerable<TEntity>> QueryAsync(Expression<Func<TEntity, bool>>? filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null, string includeProperties = "")
+    public async Task<IEnumerable<TEntity>> QueryAsync(Expression<Func<TEntity, bool>>? filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null, int offset = 0, int limit = 0, string includeProperties = "")
     {
         IQueryable<TEntity> query = _dbSet;
 
         if (filter != null)
-        {
             query = query.Where(filter);
-        }
+        
+        if(offset > 0)
+            query = query.Skip(offset);
+        
+        if(limit > 0)
+            query = query.Take(limit);
 
         foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-        {
             query = query.Include(includeProperty);
-        }
 
         if (orderBy != null)
         {
