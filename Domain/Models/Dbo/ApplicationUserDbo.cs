@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Domain.Interfaces.Dbo;
 using Microsoft.AspNetCore.Identity;
 
@@ -10,6 +11,8 @@ public class ApplicationUserDbo : IdentityUser<Guid>
 
     public ICollection<ClubMembershipDbo> ClubMemberships { get; set; } = [];
 
+    public ICollection<DiscussionDbo> Discussions { get; set; } = [];
     public ICollection<CommentDbo> Comments { get; set; } = [];
+    
     public ICollection<InvitationDbo> Invitations { get; set; } = [];
 }

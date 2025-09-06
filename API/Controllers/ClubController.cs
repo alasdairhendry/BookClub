@@ -13,11 +13,13 @@ public class ClubController : ControllerBase
 {
     private readonly ApiResponseFactory _apiResponseFactory;
     private readonly IClubService _clubService;
+    private readonly IActivityService _activityService;
 
-    public ClubController(ApiResponseFactory apiResponseFactory, IClubService clubService)
+    public ClubController(ApiResponseFactory apiResponseFactory, IClubService clubService, IActivityService activityService)
     {
         _apiResponseFactory = apiResponseFactory;
         _clubService = clubService;
+        _activityService = activityService;
     }
 
     [HttpGet("GetClub")]
@@ -162,6 +164,25 @@ public class ClubController : ControllerBase
 
             if (result.Succeeded)
                 return NoContent();
+
+            return _apiResponseFactory.FromResult(result);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return _apiResponseFactory.InternalServerError();
+        }
+    }
+    
+    [HttpPost("{clubId:guid}/CreateActivity")]
+    public async Task<IActionResult> CreateActivity(ActivityCreateDto model, Guid clubId)
+    {
+        try
+        {
+            var result = await _activityService.CreateActivity(model, clubId);
+
+            if (result.Succeeded)
+                return Ok(result.Data);
 
             return _apiResponseFactory.FromResult(result);
         }

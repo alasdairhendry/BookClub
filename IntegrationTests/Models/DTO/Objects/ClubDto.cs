@@ -22,7 +22,7 @@ public class ClubDto
             Motto = model.Motto,
             IsPrivate = model.IsPrivate,
             ImageUrl = model.ImageUrl,
-            MembershipIds = model.ClubMemberships.Select(x => x.Id).ToList(),
+            MembershipIds = model.Memberships.Select(x => x.Id).ToList(),
         };
     }
 }

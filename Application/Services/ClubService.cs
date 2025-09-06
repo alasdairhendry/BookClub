@@ -35,7 +35,7 @@ public class ClubService : IClubService
             if (viewCheck.Succeeded == false)
                 return ResultState<ClubDto?>.Failed(viewCheck.ErrorType, viewCheck.PublicMessage);
 
-            var result = await _unitOfWork.GetRepository<ClubDbo>().QueryAsSingleAsync(x => x.Id == id, includeProperties: "ClubMemberships");
+            var result = await _unitOfWork.GetRepository<ClubDbo>().QueryAsSingleAsync(x => x.Id == id, includeProperties: $"Memberships");
 
             if (result is null)
                 return ResultState<ClubDto?>.Failed(ResultErrorType.NotFound, "Club not found");
@@ -60,7 +60,7 @@ public class ClubService : IClubService
             if (user.Succeeded == false || user.Data is null)
                 return ResultState<List<ClubDto>>.Failed([], user.ErrorType, user.PublicMessage);
 
-            var result = await _unitOfWork.GetRepository<ClubDbo>().QueryAsync(includeProperties: "ClubMemberships");
+            var result = await _unitOfWork.GetRepository<ClubDbo>().QueryAsync(includeProperties: "Memberships");
 
             List<ClubDto> clubs = result.Take(20).Select(ClubDto.FromDatabaseObject).ToList();
 
@@ -87,14 +87,14 @@ public class ClubService : IClubService
             if (viewCheck.Succeeded == false)
                 return ResultState<List<ClubMembershipDto>>.Failed(viewCheck.ErrorType, viewCheck.PublicMessage);
             
-            var club = await _unitOfWork.GetRepository<ClubDbo>().QueryAsSingleAsync(x => x.Id == id, includeProperties: "ClubMemberships.User");
+            var club = await _unitOfWork.GetRepository<ClubDbo>().QueryAsSingleAsync(x => x.Id == id, includeProperties: "Memberships.User");
 
             if (club is null)
                 return ResultState<List<ClubMembershipDto>>.Failed([], ResultErrorType.NotFound, "Club not found");
 
             var clubMemberships = new List<ClubMembershipDto>();
 
-            foreach (var clubMembership in club.ClubMemberships)
+            foreach (var clubMembership in club.Memberships)
             {
                 var membership = await _unitOfWork.GetRepository<ClubMembershipDbo>().GetAsync(clubMembership.Id);
 
@@ -132,7 +132,7 @@ public class ClubService : IClubService
                 IsPrivate = model.IsPrivate,
                 DateCreated = DateTime.UtcNow,
                 CreatedById = user.Data.Id,
-                ClubMemberships = []
+                Memberships = []
             };
 
             await _unitOfWork.GetRepository<ClubDbo>().InsertAsync(club);
