@@ -18,13 +18,6 @@ public class AuthController : ControllerBase
         _userService = userService;
     }
 
-    [HttpGet("IntegrationTest")]
-    public async Task<IActionResult> IntegrationTest()
-    {
-        await Task.Delay(1);
-        return Ok("Hello world");
-    }
-    
     [HttpPost("Register")]
     public async Task<IActionResult> Register(UserRegistrationDto model)
     {

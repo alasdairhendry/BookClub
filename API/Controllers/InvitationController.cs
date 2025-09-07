@@ -21,12 +21,12 @@ public class InvitationController : ControllerBase
         _invitationService = invitationService;
     }
 
-    [HttpPost("SendInvitation")]
-    public async Task<IActionResult> SendInvitation(InvitationCreateDto model)
+    [HttpPost("CreateInvitation")]
+    public async Task<IActionResult> CreateInvitation(InvitationCreateDto model)
     {
         try
         {
-            var result = await _invitationService.SendInvitation(model);
+            var result = await _invitationService.CreateInvitation(model);
 
             if (result.Succeeded)
                 return Ok(result.Data);
@@ -40,7 +40,7 @@ public class InvitationController : ControllerBase
         }
     }
 
-    [HttpPatch("AcceptInvitation")]
+    [HttpPatch("{invitationId:guid}/AcceptInvitation")]
     public async Task<IActionResult> AcceptInvitation(Guid invitationId)
     {
         try
@@ -59,7 +59,7 @@ public class InvitationController : ControllerBase
         }
     }
     
-    [HttpPatch("DeclineInvitation")]
+    [HttpPatch("{invitationId:guid}/DeclineInvitation")]
     public async Task<IActionResult> DeclineInvitation(Guid invitationId)
     {
         try

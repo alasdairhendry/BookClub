@@ -17,7 +17,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUserDbo, Identi
         
         builder.Entity<ClubMembershipDbo>()
             .HasOne(e => e.Club)
-            .WithMany(e => e.ClubMemberships)
+            .WithMany(e => e.Memberships)
             .HasForeignKey(e => e.ClubId)
             .IsRequired();
         
@@ -40,11 +40,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUserDbo, Identi
             .IsRequired();
     }
 
-    public DbSet<ClubActivityDbo> Activities { get; set; }
-    public DbSet<ClubActivitySectionDbo> ActivitySections { get; set; }
     public new DbSet<ApplicationUserDbo> Users { get; set; }
+    
     public DbSet<ClubDbo> Clubs { get; set; }
     public DbSet<ClubMembershipDbo> ClubMemberships { get; set; }
+    public DbSet<ActivityDbo> Activities { get; set; }
+    public DbSet<DiscussionDbo> Discussions { get; set; }
     public DbSet<CommentDbo> Comments { get; set; }
     public DbSet<InvitationDbo> Invitations { get; set; }
     public DbSet<RecordDbo> Records { get; set; }

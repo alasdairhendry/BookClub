@@ -19,12 +19,12 @@ public class AccountController : ControllerBase
         _accountService = accountService;
     }
 
-    [HttpGet("GetUserDetails")]
-    public async Task<IActionResult> GetUserDetails(Guid id)
+    [HttpGet("GetUserDetails/{userId:guid}")]
+    public async Task<IActionResult> GetUserDetails(Guid userId)
     {
         try
         {
-            var result = await _accountService.GetUserDetailsAsync(id);
+            var result = await _accountService.GetUserDetailsAsync(userId);
 
             if (result.Succeeded)
                 return Ok(result.Data);
@@ -38,12 +38,12 @@ public class AccountController : ControllerBase
         }
     }
 
-    [HttpGet("GetUserClubMemberships")]
-    public async Task<IActionResult> GetUserClubMemberships(Guid id)
+    [HttpGet("GetUserClubMemberships/{userId:guid}")]
+    public async Task<IActionResult> GetUserClubMemberships(Guid userId)
     {
         try
         {
-            var result = await _accountService.GetUserClubMembershipsAsync(id);
+            var result = await _accountService.GetUserClubMembershipsAsync(userId);
 
             if (result.Succeeded)
                 return Ok(result.Data);
@@ -57,12 +57,12 @@ public class AccountController : ControllerBase
         }
     }
     
-    [HttpGet("GetUserClubInvitations")] 
-    public async Task<IActionResult> GetUserClubInvitations(Guid id, bool activeOnly = false)
+    [HttpGet("GetUserClubInvitations/{userId:guid}")] 
+    public async Task<IActionResult> GetUserClubInvitations(Guid userId, bool activeOnly = false)
     {
         try
         {
-            var result = await _accountService.GetUserClubInvitationsAsync(id, activeOnly);
+            var result = await _accountService.GetUserClubInvitationsAsync(userId, activeOnly);
 
             if (result.Succeeded)
                 return Ok(result.Data);
@@ -76,7 +76,7 @@ public class AccountController : ControllerBase
         }
     }
 
-    [HttpDelete("LeaveClub")]
+    [HttpDelete("LeaveClub/{clubId:guid}")]
     public async Task<IActionResult> LeaveClub(Guid clubId)
     {
         try
