@@ -41,7 +41,7 @@ public class ActivityController : ControllerBase
         }
     }
 
-    [HttpPatch("{activityId:guid}/Complete")]
+    [HttpPatch("{activityId:guid}/CompleteActivity")]
     public async Task<IActionResult> CompleteActivity(Guid activityId)
     {
         try
@@ -60,7 +60,7 @@ public class ActivityController : ControllerBase
         }
     }
 
-    [HttpPatch("{activityId:guid}/Cancel")]
+    [HttpPatch("{activityId:guid}/CancelActivity")]
     public async Task<IActionResult> CancelActivity(Guid activityId)
     {
         try

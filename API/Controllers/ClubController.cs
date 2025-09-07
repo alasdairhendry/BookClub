@@ -22,12 +22,12 @@ public class ClubController : ControllerBase
         _activityService = activityService;
     }
 
-    [HttpGet("GetClub")]
-    public async Task<IActionResult> GetClub(Guid id)
+    [HttpGet("{clubId:guid}")]
+    public async Task<IActionResult> GetClub(Guid clubId)
     {
         try
         {
-            var result = await _clubService.GetClub(id);
+            var result = await _clubService.GetClub(clubId);
 
             if (result.Succeeded)
                 return Ok(result.Data);
@@ -60,25 +60,6 @@ public class ClubController : ControllerBase
         }
     }
 
-    [HttpGet("GetClubMemberships")]
-    public async Task<IActionResult> GetClubMemberships(Guid id)
-    {
-        try
-        {
-            var result = await _clubService.GetMemberships(id);
-
-            if (result.Succeeded)
-                return Ok(result.Data);
-
-            return _apiResponseFactory.FromResult(result);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            return _apiResponseFactory.InternalServerError();
-        }
-    }
-
     [HttpPost("CreateClub")]
     public async Task<IActionResult> CreateClub(ClubCreateDto model)
     {
@@ -98,12 +79,12 @@ public class ClubController : ControllerBase
         }
     }
 
-    [HttpPatch("UpdateClub")]
-    public async Task<IActionResult> UpdateClub(ClubUpdateDto model)
+    [HttpPatch("{clubId:guid}/UpdateClub")]
+    public async Task<IActionResult> UpdateClub(ClubUpdateDto model, Guid clubId)
     {
         try
         {
-            var result = await _clubService.UpdateClub(model);
+            var result = await _clubService.UpdateClub(model, clubId);
 
             if (result.Succeeded)
                 return NoContent();
@@ -117,7 +98,26 @@ public class ClubController : ControllerBase
         }
     }
 
-    [HttpPatch("UpdateMemberRole")]
+    [HttpDelete("{clubId:guid}/DeleteClub")]
+    public async Task<IActionResult> DeleteClub(Guid clubId)
+    {
+        try
+        {
+            var result = await _clubService.DeleteClub(clubId);
+
+            if (result.Succeeded)
+                return NoContent();
+
+            return _apiResponseFactory.FromResult(result);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return _apiResponseFactory.InternalServerError();
+        }
+    }
+
+    [HttpPatch("{clubId:guid}/UpdateMemberRole")]
     public async Task<IActionResult> UpdateMemberRole(Guid userId, Guid clubId, bool isAdmin)
     {
         try
@@ -136,7 +136,7 @@ public class ClubController : ControllerBase
         }
     }
 
-    [HttpDelete("RemoveMemberFromClub")]
+    [HttpDelete("{clubId:guid}/RemoveMemberFromClub")]
     public async Task<IActionResult> RemoveMemberFromClub(Guid userId, Guid clubId)
     {
         try
@@ -155,15 +155,15 @@ public class ClubController : ControllerBase
         }
     }
 
-    [HttpDelete("DeleteClub")]
-    public async Task<IActionResult> DeleteClub(Guid id)
+    [HttpPost("{clubId:guid}/CreateActivity")]
+    public async Task<IActionResult> CreateActivity(ActivityCreateDto model, Guid clubId)
     {
         try
         {
-            var result = await _clubService.DeleteClub(id);
+            var result = await _activityService.CreateActivity(model, clubId);
 
             if (result.Succeeded)
-                return NoContent();
+                return Ok(result.Data);
 
             return _apiResponseFactory.FromResult(result);
         }
@@ -173,13 +173,51 @@ public class ClubController : ControllerBase
             return _apiResponseFactory.InternalServerError();
         }
     }
-    
-    [HttpPost("{clubId:guid}/CreateActivity")]
-    public async Task<IActionResult> CreateActivity(ActivityCreateDto model, Guid clubId)
+
+    [HttpGet("{clubId:guid}/GetMemberships")]
+    public async Task<IActionResult> GetMemberships(Guid clubId)
     {
         try
         {
-            var result = await _activityService.CreateActivity(model, clubId);
+            var result = await _clubService.GetMemberships(clubId);
+
+            if (result.Succeeded)
+                return Ok(result.Data);
+
+            return _apiResponseFactory.FromResult(result);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return _apiResponseFactory.InternalServerError();
+        }
+    }
+
+    [HttpGet("{clubId:guid}/GetActivities")]
+    public async Task<IActionResult> GetActivities(Guid clubId, bool includeActive)
+    {
+        try
+        {
+            var result = await _clubService.GetActivities(clubId, includeActive);
+
+            if (result.Succeeded)
+                return Ok(result.Data);
+
+            return _apiResponseFactory.FromResult(result);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return _apiResponseFactory.InternalServerError();
+        }
+    }
+
+    [HttpGet("{clubId:guid}/GetInvitations")]
+    public async Task<IActionResult> GetInvitations(Guid clubId, bool includeInactive)
+    {
+        try
+        {
+            var result = await _clubService.GetInvitations(clubId, includeInactive);
 
             if (result.Succeeded)
                 return Ok(result.Data);

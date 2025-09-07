@@ -17,13 +17,34 @@ public class RecordController : ControllerBase
         _apiResponseFactory = apiResponseFactory;
         _recordService = recordService;
     }
-    
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetRecord(Guid id)
+    {
+        try
+        {
+            var result = await _recordService.GetRecordAsync(id);
+            ;
+
+            if (result.Succeeded)
+                return Ok(result.Data);
+
+            return _apiResponseFactory.FromResult(result);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return _apiResponseFactory.InternalServerError();
+        }
+    }
+
     [HttpGet("GetSuggestion")]
     public async Task<IActionResult> GetSuggestion(string request)
     {
         try
         {
-            var result = await _recordService.GetSuggestionResultAsync(request);;
+            var result = await _recordService.GetSuggestionResultAsync(request);
+            ;
 
             if (result.Succeeded)
                 return Ok(result.Data);
@@ -37,25 +58,6 @@ public class RecordController : ControllerBase
         }
     }
 
-    [HttpGet("GetRecord")]
-    public async Task<IActionResult> GetRecord(Guid id)
-    {
-        try
-        {
-            var result = await _recordService.GetRecordAsync(id);;
-
-            if (result.Succeeded)
-                return Ok(result.Data);
-
-            return _apiResponseFactory.FromResult(result);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            return _apiResponseFactory.InternalServerError();
-        }
-    }
-    
     [HttpPost("Search")]
     public async Task<IActionResult> Search(SearchRequestDto awd)
     {

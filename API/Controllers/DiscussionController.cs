@@ -39,7 +39,7 @@ public class DiscussionController : ControllerBase
         }
     }
     
-    [HttpPatch("{discussionId:guid}/Close")]
+    [HttpPatch("{discussionId:guid}/CloseDiscussion")]
     public async Task<IActionResult> CloseDiscussion(Guid discussionId)
     {
         try
@@ -58,7 +58,7 @@ public class DiscussionController : ControllerBase
         }
     }
     
-    [HttpDelete("{discussionId:guid}/Delete")]
+    [HttpDelete("{discussionId:guid}/DeleteDiscussion")]
     public async Task<IActionResult> DeleteDiscussion(Guid discussionId)
     {
         try
