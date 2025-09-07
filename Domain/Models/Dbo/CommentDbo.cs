@@ -5,7 +5,7 @@ namespace Domain.Models.Dbo;
 public class CommentDbo
 {
     public Guid Id { get; set; }
-    public Guid ParentId { get; set; }
+    public Guid? ParentId { get; set; }
 
     public Guid? UserId { get; set; }
     [MaxLength(128)] public string Username { get; set; } = null!;

@@ -18,5 +18,5 @@ public class InvitationDbo
     public DateTime DateCreated { get; set; }
     public DateTime? DateResponded { get; set; } = null;
 
-    public bool Response { get; set; }
+    public bool? Response { get; set; }
 }

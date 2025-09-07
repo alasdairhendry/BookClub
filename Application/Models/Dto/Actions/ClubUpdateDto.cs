@@ -4,8 +4,6 @@ namespace Application.Models.Dto.Actions;
 
 public class ClubUpdateDto
 {
-    public Guid Id { get; set; }
-    
     [DefaultValue("My Updated Club!")] public string? Name { get; set; } = null!;
 
     [DefaultValue("")]

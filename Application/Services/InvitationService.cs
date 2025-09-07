@@ -23,7 +23,7 @@ public class InvitationService : IInvitationService
         _accountService = accountService;
     }
 
-    public async Task<ResultStateId> SendInvitation(InvitationCreateDto model)
+    public async Task<ResultStateId> CreateInvitation(InvitationCreateDto model)
     {
         try
         {
@@ -93,6 +93,9 @@ public class InvitationService : IInvitationService
             if ((await _accountService.IsMemberOfClubAsync(invitation.TargetUserId, invitation.TargetClubId)).Succeeded)
                 return ResultState.Failed(ResultErrorType.Validation, "User is already a member of this Club");
 
+            if(invitation.Response != null)
+                return ResultState.Failed(ResultErrorType.Validation, "Invitation has already been responded to");
+            
             invitation.DateResponded = DateTime.UtcNow;
             invitation.Response = true;
 
@@ -137,6 +140,9 @@ public class InvitationService : IInvitationService
             if (user.Data.Id != invitation.TargetUserId)
                 return ResultState.Failed(ResultErrorType.Validation, "User cannot decline this invitation");
 
+            if(invitation.Response != null)
+                return ResultState.Failed(ResultErrorType.Validation, "Invitation has already been responded to");
+            
             invitation.DateResponded = DateTime.UtcNow;
             invitation.Response = false;
 

@@ -1,5 +1,5 @@
+using System.Text.Json.Serialization;
 using Domain.Enums;
-using Domain.Interfaces;
 using Domain.Models.Dbo;
 
 namespace Application.Models.Dto.Objects;
@@ -7,18 +7,18 @@ namespace Application.Models.Dto.Objects;
 public class ActivityDto
 {
     public Guid Id { get; set; }
-    
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public ActivityState State { get; set; }
 
-    public ClubDto Club { get; set; } = null!;
-    public RecordDto Record { get; set; } = null!;
-
     public DateTime StartDate { get; set; }
-    
+
     public DateTime? TargetEndDate { get; set; }
     public DateTime? ActualEndDate { get; set; }
-    
-    public List<DiscussionDto> Discussions { get; set; } = [];
+
+    public Guid ClubId { get; set; }
+    public RecordDto Record { get; set; } = null!;
+    public List<Guid> Discussions { get; set; } = [];
 
     public static ActivityDto FromDatabaseObject(ActivityDbo model)
     {
@@ -26,12 +26,17 @@ public class ActivityDto
         {
             Id = model.Id,
             State = model.State,
-            Club = ClubDto.FromDatabaseObject(model.Club),
+            ClubId = model.Club.Id,
             Record = RecordDto.FromDatabaseObject(model.Record),
             StartDate = model.StartDate,
             TargetEndDate = model.TargetEndDate,
             ActualEndDate = model.ActualEndDate,
-            Discussions = model.Discussions.Select(DiscussionDto.FromDatabaseObject).ToList(),
+            Discussions = model.Discussions.Select(x=>x.Id).ToList()
         };
+    }
+
+    public static ActivityDto? FromDatabaseObjectNullable(ActivityDbo? model)
+    {
+        return model is null ? null : FromDatabaseObject(model);
     }
 }

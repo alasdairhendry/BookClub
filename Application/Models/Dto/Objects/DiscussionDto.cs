@@ -5,19 +5,19 @@ namespace Application.Models.Dto.Objects;
 public class DiscussionDto
 {
     public Guid Id { get; set; }
-    
+
     public ActivityDto Activity { get; set; } = null!;
-    
+
     public Guid? UserId { get; set; }
     public string Username { get; set; } = null!;
-    
+
     public string Title { get; set; } = null!;
     public string? Description { get; set; } = null!;
     public bool IsClosed { get; set; }
     public int? Page { get; set; }
-    
+
     public List<CommentDto> Comments { get; set; } = [];
-    
+
     public DateTime DateCreated { get; set; }
 
     public static DiscussionDto FromDatabaseObject(DiscussionDbo model)
@@ -32,7 +32,7 @@ public class DiscussionDto
             Description = model.Description,
             IsClosed = model.IsClosed,
             Page = model.Page,
-            Comments = model.Comments.Select(CommentDto.FromDatabaseObject).ToList(),
+            Comments = model.Comments.Select(x => CommentDto.FromDatabaseObject(x, false)).ToList(),
             DateCreated = model.DateCreated,
         };
     }

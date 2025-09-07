@@ -6,23 +6,23 @@ public class InvitationDto
 {
     public Guid Id { get; set; }
 
-    public UserDto FromUser { get; set; } = null!;
-    public UserDto TargetUser { get; set; } = null!;
-    public ClubDto TargetClub { get; set; } = null!;
+    public Guid FromUserId { get; set; } 
+    public Guid TargetUserId { get; set; }
+    public Guid TargetClubId { get; set; }
 
     public DateTime DateCreated { get; set; }
     public DateTime? DateResponded { get; set; }
 
-    public bool Response { get; set; }
+    public bool? Response { get; set; }
 
     public static InvitationDto FromDatabaseObject(InvitationDbo model)
     {
         return new InvitationDto
         {
             Id = model.Id,
-            FromUser = UserDto.FromDatabaseObject(model.FromUser!),
-            TargetUser = UserDto.FromDatabaseObject(model.TargetUser!),
-            TargetClub = ClubDto.FromDatabaseObject(model.TargetClub!),
+            FromUserId = model.FromUserId,
+            TargetUserId = model.TargetUserId,
+            TargetClubId = model.TargetClubId,
             DateCreated = model.DateCreated,
             DateResponded = model.DateResponded,
             Response = model.Response

@@ -1,4 +1,4 @@
-using Domain.Interfaces;
+using Domain.Enums;
 
 namespace Domain.Models.Dbo;
 

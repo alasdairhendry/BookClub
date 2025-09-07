@@ -67,7 +67,7 @@ public class ActivityService : IActivityService
                 return ResultStateId.Failed(adminCheck.ErrorType, adminCheck.PublicMessage);
 
             var existingActivity = await _unitOfWork.GetRepository<ActivityDbo>().QueryAsSingleAsync(x =>
-                x.ActualEndDate == null);
+                x.State == ActivityState.Active);
 
             if (existingActivity is not null)
                 return ResultStateId.Failed(ResultErrorType.Validation, $"Can't have more than one activity in progress. Finish your book!");
@@ -106,6 +106,9 @@ public class ActivityService : IActivityService
 
             if (activity is null)
                 return ResultState.Failed(ResultErrorType.NotFound, "Activity not found");
+            
+            if(activity.State != ActivityState.Active)
+                return ResultState.Failed(ResultErrorType.Validation, $"Activity is already {activity.State}");
 
             var adminCheck = await _permissionService.ContextUserIsAdminOfClubAsync(activity.ClubId);
 
@@ -140,6 +143,9 @@ public class ActivityService : IActivityService
 
             if (activity is null)
                 return ResultState.Failed(ResultErrorType.NotFound, "Activity not found");
+            
+            if(activity.State != ActivityState.Active)
+                return ResultState.Failed(ResultErrorType.Validation, $"Activity is already {activity.State}");
 
             var adminCheck = await _permissionService.ContextUserIsAdminOfClubAsync(activity.ClubId);
 
