@@ -31,7 +31,7 @@ public class ActivityService : IActivityService
             if (user.Succeeded == false || user.Data is null)
                 return ResultState<ActivityDto?>.Failed(user.ErrorType, user.PublicMessage);
 
-            var result = await _unitOfWork.GetRepository<ActivityDbo>().QueryAsSingleAsync(x => x.Id == id, includeProperties: "Club,Record");
+            var result = await _unitOfWork.GetRepository<ActivityDbo>().QueryAsSingleAsync(x => x.Id == id, includeProperties: "Club,Record,Discussions");
 
             if (result is null)
                 return ResultState<ActivityDto?>.Failed(ResultErrorType.NotFound, "Activity not found");
