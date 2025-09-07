@@ -13,7 +13,7 @@ public class InvitationDto
     public DateTime DateCreated { get; set; }
     public DateTime? DateResponded { get; set; }
 
-    public bool Response { get; set; }
+    public bool? Response { get; set; }
 
     public static InvitationDto FromDatabaseObject(InvitationDbo model)
     {

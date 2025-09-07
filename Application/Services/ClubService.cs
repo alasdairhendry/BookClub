@@ -35,7 +35,7 @@ public class ClubService : IClubService
             if (viewCheck.Succeeded == false)
                 return ResultState<ClubDto?>.Failed(viewCheck.ErrorType, viewCheck.PublicMessage);
 
-            var result = await _unitOfWork.GetRepository<ClubDbo>().QueryAsSingleAsync(x => x.Id == id, includeProperties: $"Memberships");
+            var result = await _unitOfWork.GetRepository<ClubDbo>().QueryAsSingleAsync(x => x.Id == id, includeProperties: $"Memberships,Activities,Invitations");
 
             if (result is null)
                 return ResultState<ClubDto?>.Failed(ResultErrorType.NotFound, "Club not found");
@@ -60,9 +60,9 @@ public class ClubService : IClubService
             if (user.Succeeded == false || user.Data is null)
                 return ResultState<List<ClubDto>>.Failed([], user.ErrorType, user.PublicMessage);
 
-            var result = await _unitOfWork.GetRepository<ClubDbo>().QueryAsync(includeProperties: "Memberships");
+            var result = await _unitOfWork.GetRepository<ClubDbo>().QueryAsync(includeProperties: "Memberships,Activities,Invitations");
 
-            List<ClubDto> clubs = result.Take(20).Select(ClubDto.FromDatabaseObject).ToList();
+            List<ClubDto> clubs = result.Take(20).Select(x => ClubDto.FromDatabaseObject(x)).ToList();
 
             return ResultState<List<ClubDto>>.Success(clubs);
         }
@@ -82,15 +82,15 @@ public class ClubService : IClubService
             if (user.Succeeded == false || user.Data is null)
                 return ResultState<List<ClubMembershipDto>>.Failed([], user.ErrorType, user.PublicMessage);
 
-            var viewCheck = await _permissionService.ContextUserHasViewOfClubAsync(id);
-
-            if (viewCheck.Succeeded == false)
-                return ResultState<List<ClubMembershipDto>>.Failed(viewCheck.ErrorType, viewCheck.PublicMessage);
-            
             var club = await _unitOfWork.GetRepository<ClubDbo>().QueryAsSingleAsync(x => x.Id == id, includeProperties: "Memberships.User");
 
             if (club is null)
                 return ResultState<List<ClubMembershipDto>>.Failed([], ResultErrorType.NotFound, "Club not found");
+
+            var viewCheck = await _permissionService.ContextUserHasViewOfClubAsync(id);
+
+            if (viewCheck.Succeeded == false)
+                return ResultState<List<ClubMembershipDto>>.Failed(viewCheck.ErrorType, viewCheck.PublicMessage);
 
             var clubMemberships = new List<ClubMembershipDto>();
 
@@ -107,6 +107,96 @@ public class ClubService : IClubService
             }
 
             return ResultState<List<ClubMembershipDto>>.Success(clubMemberships);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<ResultState<List<ActivityDto>>> GetActivities(Guid? id, bool includeActive)
+    {
+        try
+        {
+            var user = await _httpContextService.ContextApplicationUserIsEnabledAsync();
+
+            if (user.Succeeded == false || user.Data is null)
+                return ResultState<List<ActivityDto>>.Failed([], user.ErrorType, user.PublicMessage);
+
+            var club = await _unitOfWork.GetRepository<ClubDbo>().QueryAsSingleAsync(x => x.Id == id, includeProperties: $"Activities.Record,Activities.Discussions");
+
+            if (club is null)
+                return ResultState<List<ActivityDto>>.Failed(ResultErrorType.NotFound, "Club not found");
+
+            var viewCheck = await _permissionService.ContextUserHasViewOfClubAsync(id);
+
+            if (viewCheck.Succeeded == false)
+                return ResultState<List<ActivityDto>>.Failed(viewCheck.ErrorType, viewCheck.PublicMessage);
+
+            var activities = new List<ActivityDto>();
+
+            foreach (var activity in club.Activities)
+            {
+                var get = await _unitOfWork.GetRepository<ActivityDbo>().GetAsync(activity.Id);
+
+                if (get is null)
+                    continue;
+
+                if (includeActive == false && get.State == ActivityState.Active)
+                    continue;
+
+                var dto = ActivityDto.FromDatabaseObject(get);
+
+                activities.Add(dto);
+            }
+
+            return ResultState<List<ActivityDto>>.Success(activities);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<ResultState<List<InvitationDto>>> GetInvitations(Guid? id, bool includeInactive)
+    {
+        try
+        {
+            var user = await _httpContextService.ContextApplicationUserIsEnabledAsync();
+
+            if (user.Succeeded == false || user.Data is null)
+                return ResultState<List<InvitationDto>>.Failed([], user.ErrorType, user.PublicMessage);
+
+            var club = await _unitOfWork.GetRepository<ClubDbo>().QueryAsSingleAsync(x => x.Id == id, includeProperties: $"Invitations");
+
+            if (club is null)
+                return ResultState<List<InvitationDto>>.Failed(ResultErrorType.NotFound, "Club not found");
+
+            var adminCheck = await _permissionService.ContextUserIsAdminOfClubAsync(id);
+
+            if (adminCheck.Succeeded == false)
+                return ResultState<List<InvitationDto>>.Failed(adminCheck.ErrorType, adminCheck.PublicMessage);
+
+            var invitations = new List<InvitationDto>();
+
+            foreach (var invitation in club.Invitations)
+            {
+                var get = await _unitOfWork.GetRepository<InvitationDbo>().GetAsync(invitation.Id);
+
+                if (get is null)
+                    continue;
+
+                if (get.Response != null && includeInactive == false)
+                    continue;
+
+                var dto = InvitationDto.FromDatabaseObject(get);
+
+                invitations.Add(dto);
+            }
+
+            return ResultState<List<InvitationDto>>.Success(invitations);
         }
         catch (Exception e)
         {
@@ -157,7 +247,7 @@ public class ClubService : IClubService
         }
     }
 
-    public async Task<ResultState> UpdateClub(ClubUpdateDto model)
+    public async Task<ResultState> UpdateClub(ClubUpdateDto model, Guid clubId)
     {
         try
         {
@@ -166,12 +256,12 @@ public class ClubService : IClubService
             if (user.Succeeded == false || user.Data is null)
                 return ResultState.Failed(user.ErrorType, user.PublicMessage);
 
-            var adminCheck = await _permissionService.ContextUserIsAdminOfClubAsync(model.Id);
+            var adminCheck = await _permissionService.ContextUserIsAdminOfClubAsync(clubId);
 
             if (adminCheck.Succeeded == false)
                 return ResultState.Failed(adminCheck.ErrorType, adminCheck.PublicMessage);
 
-            ClubDbo? club = await _unitOfWork.GetRepository<ClubDbo>().GetAsync(model.Id);
+            ClubDbo? club = await _unitOfWork.GetRepository<ClubDbo>().GetAsync(clubId);
 
             if (club is null)
                 return ResultState.Failed(ResultErrorType.NotFound, "Club not found");

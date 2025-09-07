@@ -31,7 +31,7 @@ public class DiscussionService : IDiscussionService
             if (user.Succeeded == false || user.Data is null)
                 return ResultState<DiscussionDto?>.Failed(user.ErrorType, user.PublicMessage);
 
-            var result = await _unitOfWork.GetRepository<DiscussionDbo>().QueryAsSingleAsync(x => x.Id == id, includeProperties: "Activity.Club");
+            var result = await _unitOfWork.GetRepository<DiscussionDbo>().QueryAsSingleAsync(x => x.Id == id, includeProperties: "Activity.Club,Comments");
 
             if (result is null)
                 return ResultState<DiscussionDto?>.Failed(ResultErrorType.NotFound, "Discussion not found");
@@ -61,7 +61,7 @@ public class DiscussionService : IDiscussionService
             if (user.Succeeded == false || user.Data is null)
                 return ResultState<List<DiscussionDto>>.Failed([], user.ErrorType, user.PublicMessage);
 
-            var activity = await _unitOfWork.GetRepository<ActivityDbo>().QueryAsSingleAsync(x => x.Id == activityId, includeProperties: "Club");
+            var activity = await _unitOfWork.GetRepository<ActivityDbo>().QueryAsSingleAsync(x => x.Id == activityId, includeProperties: "Club,Record");
 
             if (activity is null)
                 return ResultState<List<DiscussionDto>>.Failed([], ResultErrorType.NotFound, "Activity not found");
@@ -71,7 +71,7 @@ public class DiscussionService : IDiscussionService
             if (viewCheck.Succeeded == false)
                 return ResultState<List<DiscussionDto>>.Failed([], viewCheck.ErrorType, viewCheck.PublicMessage);
 
-            var discussions = await _unitOfWork.GetRepository<DiscussionDbo>().QueryAsync(x => x.ActivityId == activityId);
+            var discussions = await _unitOfWork.GetRepository<DiscussionDbo>().QueryAsync(x => x.ActivityId == activityId, includeProperties: "Comments");
 
             var result = discussions.Select(DiscussionDto.FromDatabaseObject).ToList();
 
@@ -107,7 +107,7 @@ public class DiscussionService : IDiscussionService
                 .QueryAsync(x => x.DiscussionId == discussionId,
                     orderBy: dbos => dbos.OrderBy(x => x.DateCreated));
 
-            var result = comments.Select(CommentDto.FromDatabaseObject).ToList();
+            var result = comments.Select(x => CommentDto.FromDatabaseObject(x, false)).ToList();
 
             return ResultState<List<CommentDto>>.Success(result);
         }
@@ -117,7 +117,7 @@ public class DiscussionService : IDiscussionService
             throw;
         }
     }
-    
+
     public async Task<ResultStateId> CreateDiscussion(DiscussionCreateDto model, Guid activityId)
     {
         try
@@ -225,7 +225,7 @@ public class DiscussionService : IDiscussionService
             }
 
             discussion.IsClosed = true;
-            
+
             _unitOfWork.GetRepository<DiscussionDbo>().Update(discussion);
             await _unitOfWork.SaveAsync();
 
@@ -295,7 +295,7 @@ public class DiscussionService : IDiscussionService
             }
 
             comment.SoftDelete = true;
-            
+
             _unitOfWork.GetRepository<CommentDbo>().Update(comment);
             await _unitOfWork.SaveAsync();
 

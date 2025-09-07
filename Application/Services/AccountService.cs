@@ -64,7 +64,7 @@ public class AccountService : IAccountService
     {
         try
         {
-            var user = await _unitOfWork.GetRepository<ApplicationUserDbo>().QueryAsSingleAsync(x => x.Id == userId, "Memberships");
+            var user = await _unitOfWork.GetRepository<ApplicationUserDbo>().QueryAsSingleAsync(x => x.Id == userId, "ClubMemberships");
 
             if (user is null)
                 return ResultState<List<ClubDto>>.Failed([], ResultErrorType.NotFound, "User does not exist");
