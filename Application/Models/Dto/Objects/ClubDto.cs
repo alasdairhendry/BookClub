@@ -33,8 +33,7 @@ public class ClubDto
             MembershipIds = model.Memberships.Select(x => x.Id).ToList(),
             CurrentActivity = includeObjects ? currentActivity : null!,
             ActivityCount = model.Activities.Count,
-            MembershipCount = model.Memberships.Count,
-            InvitationCount = model.Invitations.Count(x => x.Response == null),
+            MembershipCount = model.Memberships.Count,           
         };
     }
 }
