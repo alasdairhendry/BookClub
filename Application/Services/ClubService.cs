@@ -35,7 +35,7 @@ public class ClubService : IClubService
             if (viewCheck.Succeeded == false)
                 return ResultState<ClubDto?>.Failed(viewCheck.ErrorType, viewCheck.PublicMessage);
 
-            var result = await _unitOfWork.GetRepository<ClubDbo>().QueryAsSingleAsync(x => x.Id == id, includeProperties: $"Memberships,Activities,Invitations");
+            var result = await _unitOfWork.GetRepository<ClubDbo>().QueryAsSingleAsync(x => x.Id == id, includeProperties: $"Memberships,Activities.Record,Invitations");
 
             if (result is null)
                 return ResultState<ClubDto?>.Failed(ResultErrorType.NotFound, "Club not found");
@@ -60,7 +60,7 @@ public class ClubService : IClubService
             if (user.Succeeded == false || user.Data is null)
                 return ResultState<List<ClubDto>>.Failed([], user.ErrorType, user.PublicMessage);
 
-            var result = await _unitOfWork.GetRepository<ClubDbo>().QueryAsync(includeProperties: "Memberships,Activities,Invitations");
+            var result = await _unitOfWork.GetRepository<ClubDbo>().QueryAsync(includeProperties: "Memberships,Activities.Record,Invitations");
 
             List<ClubDto> clubs = result.Take(20).Select(x => ClubDto.FromDatabaseObject(x)).ToList();
 
